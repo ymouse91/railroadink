@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Railroad Ink">
+  <rect width="512" height="512" rx="108" fill="#0d3b66"/>
+  <rect x="74" y="74" width="364" height="364" rx="54" fill="#eef5fb"/>
+  <path d="M118 256h276" fill="none" stroke="#13314f" stroke-width="28" stroke-linecap="round" stroke-dasharray="34 28"/>
+  <path d="M256 118v276" fill="none" stroke="#13314f" stroke-width="26" stroke-linecap="round"/>
+  <g stroke="#13314f" stroke-width="14" stroke-linecap="round">
+    <path d="M222 136h68"/>
+    <path d="M222 184h68"/>
+    <path d="M222 232h68"/>
+    <path d="M222 280h68"/>
+    <path d="M222 328h68"/>
+    <path d="M222 376h68"/>
+  </g>
+  <circle cx="256" cy="256" r="36" fill="#e0572f"/>
+</svg>

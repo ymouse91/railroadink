@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Railroad Ink">
+<meta name="theme-color" content="#0d3b66">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <title>Railroad Ink — Yksinpeli</title>
 <style>
   :root{
@@ -25,26 +30,32 @@
     --shadow:0 2px 10px rgba(13,59,102,.15);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;height:100%;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
     background:
       radial-gradient(ellipse at top, var(--bg-mid), var(--bg-deep) 70%);
     color:var(--ink);
-    min-height:100vh;
+    height:100vh;
+    height:100dvh;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     -webkit-user-select:none;user-select:none;
     overscroll-behavior:none;
   }
-  .wrap{max-width:760px;margin:0 auto;padding:10px 10px 40px;}
+  .wrap{
+    width:min(100%,1120px);height:100%;margin:0 auto;
+    padding:clamp(5px,1.2vmin,10px);
+    display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:clamp(5px,1vmin,8px);
+  }
 
   header{
     display:flex;align-items:center;justify-content:space-between;
-    padding:10px 4px 14px;
+    padding:clamp(3px,.8vmin,8px) 4px;
     color:#fff;
+    min-height:0;
   }
   header h1{
-    font-size:20px;margin:0;font-weight:800;letter-spacing:.3px;
+    font-size:clamp(16px,2.4vmin,20px);margin:0;font-weight:800;letter-spacing:.3px;
     display:flex;align-items:baseline;gap:8px;
   }
   header h1 .sub{font-size:11px;font-weight:500;opacity:.75;letter-spacing:.5px;text-transform:uppercase;}
@@ -54,17 +65,33 @@
     box-shadow:var(--shadow);white-space:nowrap;
   }
 
+  .game-layout{
+    min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,340px);
+    grid-template-areas:"board controls";
+    gap:clamp(6px,1.2vmin,12px);align-items:stretch;
+  }
+  .side-stack{
+    grid-area:controls;min-height:0;display:grid;
+    grid-template-rows:auto auto minmax(0,1fr);
+    gap:clamp(6px,1.2vmin,12px);
+  }
   .panel{
     background:var(--panel);border-radius:16px;box-shadow:var(--shadow);
-    padding:14px;margin-bottom:12px;
+    padding:clamp(8px,1.5vmin,14px);margin:0;
   }
+  .dice-panel{min-height:clamp(205px,31vmin,248px);}
+  .special-panel{min-height:clamp(100px,15vmin,120px);}
 
   /* dice row */
-  .dice-row{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;}
+  .dice-row{
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(5px,1vmin,8px);
+    align-items:stretch;min-height:clamp(74px,11vmin,92px);
+  }
   .die{
-    flex:1 1 0;min-width:64px;
+    height:clamp(74px,11vmin,92px);
+    min-width:0;
     background:var(--paper);border:1.5px solid var(--paper-line);
-    border-radius:12px;padding:8px 4px 6px;
+    border-radius:12px;padding:clamp(5px,1vmin,8px) 3px clamp(4px,.8vmin,6px);
     display:flex;flex-direction:column;align-items:center;gap:4px;
     position:relative;
     transition:transform .12s, box-shadow .12s, border-color .12s;
@@ -73,18 +100,29 @@
   .die.selectable{cursor:pointer;}
   .die.selectable:active{transform:scale(.95);}
   .die.selected{border-color:var(--coral);box-shadow:0 0 0 2px var(--coral) inset;}
-  .die svg{width:38px;height:38px;}
-  .die .label{font-size:9px;color:var(--ink-soft);text-align:center;line-height:1.2;font-weight:600;}
+  .die svg{width:clamp(28px,4.6vmin,38px);height:clamp(28px,4.6vmin,38px);}
+  .die .label{
+    font-size:9px;color:var(--ink-soft);text-align:center;line-height:1.2;font-weight:600;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
   .die .check{
     position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;
     background:var(--ok);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;
     font-weight:800;
   }
+  .dice-placeholder{
+    grid-column:1/-1;height:clamp(74px,11vmin,92px);
+    display:flex;align-items:center;padding:0 4px;
+    font-size:12px;color:var(--ink-soft);
+  }
 
-  .toolbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;}
+  .toolbar{
+    display:flex;gap:clamp(5px,1vmin,8px);margin-top:clamp(6px,1.2vmin,10px);
+    flex-wrap:wrap;align-items:center;min-height:38px;
+  }
   .btn{
     border:1.5px solid var(--paper-line);background:var(--paper);
-    color:var(--ink);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;
+    color:var(--ink);border-radius:10px;padding:clamp(7px,1.2vmin,9px) clamp(9px,1.5vmin,14px);font-size:clamp(12px,1.7vmin,13px);font-weight:700;
     display:flex;align-items:center;gap:6px;cursor:pointer;
   }
   .btn:active{transform:scale(.96);}
@@ -94,16 +132,24 @@
   .btn-icon{font-size:15px;line-height:1;}
   .spacer{flex:1;}
 
-  .hint{font-size:12px;color:var(--ink-soft);margin-top:8px;line-height:1.5;min-height:16px;}
+  .hint{
+    font-size:clamp(11px,1.5vmin,12px);color:var(--ink-soft);margin-top:clamp(5px,1vmin,8px);
+    line-height:1.35;height:34px;overflow:hidden;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  }
   .hint.warn{color:var(--coral-dark);font-weight:700;}
 
   /* board */
   .board-shell{
     background:var(--panel);border-radius:16px;box-shadow:var(--shadow);
-    padding:14px;margin-bottom:12px;
+    padding:clamp(6px,1.2vmin,14px);margin:0;
+    grid-area:board;
+    min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
   }
   .board-wrap{
-    position:relative;width:100%;
+    position:relative;width:min(100%,calc(100dvh - 96px));
+    max-width:100%;
+    flex:0 0 auto;
     aspect-ratio:1/1;
     background:var(--paper);
     border-radius:10px;
@@ -122,16 +168,17 @@
   .route-railway-tie{stroke:var(--rail);stroke-width:2;}
   .station-dot{fill:var(--ink);}
   .overpass-gap{stroke:var(--paper);}
-  .round-num{font-size:7px;fill:var(--ink-soft);font-weight:700;font-family:inherit;}
+  .round-num{font-size:9px;fill:var(--ink-soft);font-weight:800;font-family:inherit;}
   .ghost-piece{opacity:.55;pointer-events:none;}
   .ghost-piece.invalid .route-line, .ghost-piece.invalid .route-railway-tie{stroke:var(--error)!important;}
   .ghost-piece.invalid .station-dot{fill:var(--error)!important;}
 
   .board-controls{
-    display:flex;justify-content:center;gap:10px;margin-top:10px;
+    display:flex;justify-content:center;gap:10px;margin-top:clamp(5px,1vmin,10px);
+    flex:0 0 auto;
   }
   .round-circle{
-    width:42px;height:42px;border-radius:50%;
+    width:clamp(34px,5.4vmin,42px);height:clamp(34px,5.4vmin,42px);border-radius:50%;
     background:var(--paper);border:1.5px solid var(--paper-line);
     display:flex;align-items:center;justify-content:center;
     font-size:16px;color:var(--ink);
@@ -139,19 +186,27 @@
   .round-circle:active{transform:scale(.92);}
 
   /* special routes strip */
-  .special-strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;}
+  .special-strip{
+    display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(4px,.8vmin,8px);
+    overflow:visible;padding-bottom:0;min-height:clamp(62px,9vmin,76px);
+  }
   .special-tile{
-    flex:0 0 auto;width:54px;
+    height:clamp(62px,9vmin,76px);
+    min-width:0;
     border:1.5px solid var(--paper-line);border-radius:10px;
-    background:var(--paper);padding:6px 4px 4px;
+    background:var(--paper);padding:clamp(4px,.8vmin,6px) 3px;
     display:flex;flex-direction:column;align-items:center;gap:3px;
     position:relative;
   }
   .special-tile.used{opacity:.3;}
   .special-tile.selectable{cursor:pointer;}
   .special-tile.selected{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold) inset;}
-  .special-tile svg{width:32px;height:32px;}
-  .special-tile .label{font-size:8px;color:var(--ink-soft);text-align:center;font-weight:600;}
+  .special-tile svg{width:clamp(24px,4vmin,32px);height:clamp(24px,4vmin,32px);}
+  .special-tile .label{
+    font-size:8px;color:var(--ink-soft);text-align:center;font-weight:600;line-height:1.15;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .label br{display:block;}
 
   .section-title{font-size:11px;font-weight:800;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.6px;margin:0 0 8px;}
 
@@ -166,6 +221,11 @@
   }
   .score-total .num{font-size:30px;font-weight:800;}
   .score-total .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.9;}
+  .score-panel{
+    align-self:stretch;min-height:0;overflow:hidden;
+    transition:opacity .16s ease;
+  }
+  .score-panel.is-hidden{visibility:hidden;opacity:0;pointer-events:none;}
 
   /* modal */
   .modal-bg{
@@ -196,7 +256,61 @@
     font-size:16px;box-shadow:var(--shadow);z-index:5;
   }
 
-  footer{text-align:center;color:rgba(255,255,255,.5);font-size:10px;padding:10px 0 0;}
+  footer{text-align:center;color:rgba(255,255,255,.5);font-size:10px;padding:0;line-height:1.2;}
+
+  @media (max-width: 720px) and (orientation: portrait){
+    .wrap{grid-template-rows:auto minmax(0,1fr);gap:5px;}
+    .game-layout{
+      grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);
+      grid-template-areas:"controls" "board";
+      gap:6px;
+    }
+    .side-stack{display:grid;grid-template-columns:1fr;grid-template-rows:auto auto;gap:6px;overflow:hidden;}
+    .panel{border-radius:12px;padding:7px;}
+    .dice-panel{min-height:155px;}
+    .special-panel{min-height:91px;}
+    .dice-row{min-height:65px;}
+    .die{height:65px;}
+    .die .label,.special-tile .label{font-size:8px;}
+    .dice-placeholder{height:65px;}
+    .special-strip{min-height:55px;}
+    .special-tile{height:55px;}
+    .round-badge{padding:5px 10px;font-size:12px;}
+    .toolbar{flex-wrap:nowrap;min-height:35px;}
+    .btn{min-width:0;white-space:nowrap;}
+    #rulesBtn{padding-left:8px;padding-right:8px;}
+    .hint{height:30px;min-height:0;}
+    .score-panel.is-hidden{display:none;}
+    .wrap.game-over .side-stack{grid-template-rows:auto;}
+    .wrap.game-over .dice-panel,
+    .wrap.game-over .special-panel{display:none;}
+    .wrap.game-over .score-panel{display:block;}
+    .wrap.game-over .board-wrap{width:min(100%,calc(100dvh - 390px));}
+    .board-shell{border-radius:12px;justify-content:start;}
+    .board-wrap{width:min(100%,calc(100dvh - 365px));max-width:100%;}
+    .board-controls{margin-top:5px;}
+    footer{display:none;}
+  }
+
+  @media (max-height: 760px) and (orientation: landscape){
+    .game-layout{grid-template-columns:minmax(0,1fr) minmax(286px,320px);}
+    header h1 .sub, footer{display:none;}
+    .panel{border-radius:12px;padding:8px;}
+    .dice-panel{min-height:210px;}
+    .special-panel{min-height:100px;}
+    .section-title{margin-bottom:5px;}
+    .hint{height:32px;}
+    .board-wrap{width:min(100%,calc(100dvh - 160px));max-width:100%;}
+  }
+
+  @media (max-height: 670px) and (orientation: landscape){
+    .dice-panel{min-height:176px;}
+    .special-panel{min-height:78px;}
+    .dice-row,.die,.dice-placeholder{min-height:54px;height:54px;}
+    .special-strip,.special-tile{min-height:46px;height:46px;}
+    .die .label,.special-tile .label{display:none;}
+    .toolbar{margin-top:6px;}
+  }
 </style>
 </head>
 <body>
@@ -207,46 +321,50 @@
     <div class="round-badge" id="roundBadge">Kierros 1 / 7</div>
   </header>
 
-  <div class="panel">
-    <div class="section-title">Tämän kierroksen nopat</div>
-    <div class="dice-row" id="diceRow"></div>
-    <div class="toolbar">
-      <button class="btn primary" id="rollBtn"><span class="btn-icon">⚀</span>Heitä nopat</button>
-      <button class="btn ghost" id="endRoundBtn" disabled>Lopeta kierros →</button>
-      <div class="spacer"></div>
-      <button class="btn ghost" id="rulesBtn">Säännöt</button>
-    </div>
-    <div class="hint" id="hintText">Heitä nopat aloittaaksesi kierroksen 1.</div>
-  </div>
+  <main class="game-layout">
+    <div class="side-stack">
+      <div class="panel dice-panel">
+        <div class="section-title">Tämän kierroksen nopat</div>
+        <div class="dice-row" id="diceRow"></div>
+        <div class="toolbar">
+          <button class="btn primary" id="rollBtn"><span class="btn-icon">⚀</span>Heitä nopat</button>
+          <button class="btn ghost" id="endRoundBtn" disabled>Lopeta kierros →</button>
+          <div class="spacer"></div>
+          <button class="btn ghost" id="rulesBtn">Säännöt</button>
+        </div>
+        <div class="hint" id="hintText">Heitä nopat aloittaaksesi kierroksen 1.</div>
+      </div>
 
-  <div class="panel">
-    <div class="section-title">Erikoisreitit <span style="font-weight:500;text-transform:none;">(max 1 / kierros, 3 / peli)</span></div>
-    <div class="special-strip" id="specialStrip"></div>
-  </div>
+      <div class="panel special-panel">
+        <div class="section-title">Erikoisreitit <span style="font-weight:500;text-transform:none;">(max 1 / kierros, 3 / peli)</span></div>
+        <div class="special-strip" id="specialStrip"></div>
+      </div>
 
-  <div class="board-shell">
-    <div class="board-wrap">
-      <svg id="board" viewBox="0 0 700 700"></svg>
-      <div class="rotate-fab" id="rotateFab" style="display:none;">⟳</div>
-      <div class="flip-fab" id="flipFab" style="display:none;">⇋</div>
-      <div class="cancel-fab" id="cancelFab" style="display:none;">✕</div>
+      <div class="panel score-panel is-hidden" id="scorePanel">
+        <div class="section-title">Lopputulos</div>
+        <div class="score-grid" id="scoreGrid"></div>
+        <div class="score-total">
+          <div class="num" id="scoreTotal">0</div>
+          <div class="lbl">Yhteensä</div>
+        </div>
+        <div class="toolbar">
+          <button class="btn primary" id="newGameBtn" style="flex:1;justify-content:center;">Uusi peli</button>
+        </div>
+      </div>
     </div>
-    <div class="board-controls">
-      <div class="round-circle" id="undoBtn" title="Kumoa viimeisin">↶</div>
-    </div>
-  </div>
 
-  <div class="panel" id="scorePanel" style="display:none;">
-    <div class="section-title">Lopputulos</div>
-    <div class="score-grid" id="scoreGrid"></div>
-    <div class="score-total">
-      <div class="num" id="scoreTotal">0</div>
-      <div class="lbl">Yhteensä</div>
+    <div class="board-shell">
+      <div class="board-wrap">
+        <svg id="board" viewBox="0 0 700 700"></svg>
+        <div class="rotate-fab" id="rotateFab" style="display:none;">⟳</div>
+        <div class="flip-fab" id="flipFab" style="display:none;">⇋</div>
+        <div class="cancel-fab" id="cancelFab" style="display:none;">✕</div>
+      </div>
+      <div class="board-controls">
+        <div class="round-circle" id="undoBtn" title="Kumoa viimeisin">↶</div>
+      </div>
     </div>
-    <div class="toolbar">
-      <button class="btn primary" id="newGameBtn" style="flex:1;justify-content:center;">Uusi peli</button>
-    </div>
-  </div>
+  </main>
 
   <footer>Railroad Ink™ Hjalmar Hach &amp; Lorenzo Silva · fanin tekemä digisovellus omaan käyttöön</footer>
 </div>
@@ -299,10 +417,10 @@ const TILE_DEFS = {
   // special routes (top of board)
   sp_cross_h: { name:'Risteys (maantie)', edges:['h','h','h','h'], kind:'route', special:true },
   sp_cross_r: { name:'Risteys (rautatie)', edges:['r','r','r','r'], kind:'route', special:true },
-  sp_3stat:   { name:'Kolmoisasema', edges:['h','r','h',null], kind:'station3', special:true },
-  sp_allstat: { name:'Neliasema', edges:['h','r','h','r'], kind:'station4', special:true },
-  sp_diag1:   { name:'Erikoiskaarre A', edges:['r','h',null,null], kind:'station', special:true },
-  sp_diag2:   { name:'Erikoiskaarre B', edges:['h',null,null,'r'], kind:'station', special:true },
+  sp_3stat:   { name:'Neli- asema A', edges:['h','r','r','h'], kind:'station4', special:true },
+  sp_allstat: { name:'Neli- asema B', edges:['h','r','h','r'], kind:'station4', special:true },
+  sp_diag1:   { name:'Erikois- risteys A', edges:['h','r','r','r'], kind:'station4', special:true },
+  sp_diag2:   { name:'Erikois- risteys B', edges:['r','h','h','h'], kind:'station4', special:true },
 };
 
 // rotate edges array clockwise by 90*k degrees
@@ -329,6 +447,7 @@ const ROUTE_FACES = ['straight_h','straight_r','curved_h','curved_r','tjunc_h','
 const SPECIAL_FACES = ['overpass','overpass','station_s','station_s','station_c','station_c'];
 
 const SPECIAL_ROUTE_KEYS = ['sp_cross_h','sp_cross_r','sp_3stat','sp_allstat','sp_diag1','sp_diag2'];
+const FLIPPABLE_KEYS = new Set(['station_c']);
 
 const GRID=7;
 const CENTRAL_MIN=2, CENTRAL_MAX=4; // 0-indexed central 3x3 -> rows/cols 2..4
@@ -387,10 +506,14 @@ function exitAt(r,c,side){
   return ex ? ex.type : null;
 }
 
+function canFlipPiece(key){
+  return FLIPPABLE_KEYS.has(key);
+}
+
 /* Determine the edges array for a piece given key+rot+flip */
 function computeEdges(key, rot, flip){
   let base = TILE_DEFS[key].edges;
-  let e = flip ? flipEdges(base) : base.slice();
+  let e = (flip && canFlipPiece(key)) ? flipEdges(base) : base.slice();
   e = rotateEdges(e, rot);
   return e;
 }
@@ -609,12 +732,21 @@ function drawPieceInCell(r,c,edges,kind,isGhost,isInvalid){
   }
 
   if(kind==='overpass'){
-    // h crosses r without connecting: draw h straight one way, r straight other way, with gap
-    arm(N,'h'); arm(S,'h');
-    arm(E,'r'); arm(W,'r');
-    // small gap blocker in middle for the underneath one (railway) - draw white squares
-    g.appendChild(svgEl('rect',{x:cx-9,y:cy-3,width:18,height:6,fill:'var(--paper)'}));
-    g.appendChild(svgEl('line',{x1:cx-9,y1:cy,x2:cx+9,y2:cy,stroke:'var(--rail)','stroke-width':3,class:'route-highway'}));
+    const highwaySides = [];
+    for(let s=0;s<4;s++){
+      if(edges[s]){
+        arm(s, edges[s]);
+        if(edges[s]==='h') highwaySides.push(s);
+      }
+    }
+    const highwayIsVertical = highwaySides.includes(N) || highwaySides.includes(S);
+    if(highwayIsVertical){
+      g.appendChild(svgEl('rect',{x:cx-3,y:cy-9,width:6,height:18,fill:'var(--paper)'}));
+      g.appendChild(svgEl('line',{x1:cx,y1:cy-9,x2:cx,y2:cy+9,stroke:'var(--rail)','stroke-width':3,'stroke-linecap':'round',class:'route-highway'}));
+    } else {
+      g.appendChild(svgEl('rect',{x:cx-9,y:cy-3,width:18,height:6,fill:'var(--paper)'}));
+      g.appendChild(svgEl('line',{x1:cx-9,y1:cy,x2:cx+9,y2:cy,stroke:'var(--rail)','stroke-width':3,'stroke-linecap':'round',class:'route-highway'}));
+    }
   } else if(kind==='station' || kind==='station3' || kind==='station4'){
     for(let s=0;s<4;s++){
       if(edges[s]) arm(s, edges[s]);
@@ -779,11 +911,15 @@ function tileMiniSvg(key, size, rot, flip){
   return `<svg viewBox="0 0 ${s} ${s}" width="${s}" height="${s}"><g transform="${transform}">${inner}</g></svg>`;
 }
 
+function tileLabelHtml(name){
+  return name.replace(/- /g, '-<br>');
+}
+
 function renderDice(){
   const row = document.getElementById('diceRow');
   row.innerHTML='';
   if(state.diceFaces.length===0){
-    row.innerHTML = '<div style="font-size:12px;color:var(--ink-soft);padding:10px 4px;">Heitä nopat aloittaaksesi.</div>';
+    row.innerHTML = '<div class="dice-placeholder">Heitä nopat aloittaaksesi.</div>';
     return;
   }
   state.diceFaces.forEach((key,i)=>{
@@ -793,7 +929,7 @@ function renderDice(){
     const flip = selected ? state.pendingPiece.flip : false;
     const div = document.createElement('div');
     div.className = 'die'+(used?' used':' selectable')+(state.selectedDie===i?' selected':'');
-    div.innerHTML = tileMiniSvg(key,38,rot,flip) + `<div class="label">${TILE_DEFS[key].name}</div>` + (used?'<div class="check">✓</div>':'');
+    div.innerHTML = tileMiniSvg(key,38,rot,flip) + `<div class="label">${tileLabelHtml(TILE_DEFS[key].name)}</div>` + (used?'<div class="check">✓</div>':'');
     if(!used){
       div.addEventListener('click', ()=>selectDie(i));
     }
@@ -804,14 +940,27 @@ function renderDice(){
 function selectDie(i){
   if(state.diceUsed[i]) return;
   if(state.selectedDie===i && state.pendingPiece && state.pendingPiece.source==='die'){
-    // already selected -> tapping again rotates the piece 90 degrees
-    state.pendingPiece.rot = (state.pendingPiece.rot+1)%4;
+    if(canFlipPiece(state.pendingPiece.key)){
+      if(state.pendingPiece.nextDieClick === 'flip'){
+        state.pendingPiece.flip = !state.pendingPiece.flip;
+        state.pendingPiece.nextDieClick = 'rotate';
+      } else {
+        state.pendingPiece.rot = (state.pendingPiece.rot+1)%4;
+        state.pendingPiece.nextDieClick = 'flip';
+      }
+    } else {
+      // already selected -> tapping again rotates the piece 90 degrees
+      state.pendingPiece.rot = (state.pendingPiece.rot+1)%4;
+    }
     renderAll();
     return;
   }
   state.selectedDie = i;
   const key = state.diceFaces[i];
-  state.pendingPiece = {key, rot:0, flip:false, source:'die', dieIndex:i, previewCell:null};
+  state.pendingPiece = {
+    key, rot:0, flip:false, source:'die', dieIndex:i, previewCell:null,
+    nextDieClick: canFlipPiece(key) ? 'flip' : 'rotate'
+  };
   renderAll();
 }
 
@@ -826,7 +975,7 @@ function renderSpecial(){
     const flip = selected ? state.pendingPiece.flip : false;
     const div = document.createElement('div');
     div.className = 'special-tile'+(used?' used':'')+(!blocked?' selectable':'')+(state.selectedDie==='sp_'+key?' selected':'');
-    div.innerHTML = tileMiniSvg(key,32,rot,flip) + `<div class="label">${TILE_DEFS[key].name}</div>`;
+    div.innerHTML = tileMiniSvg(key,32,rot,flip) + `<div class="label">${tileLabelHtml(TILE_DEFS[key].name)}</div>`;
     if(!blocked){
       div.addEventListener('click', ()=>selectSpecial(key));
     } else if(!used){
@@ -854,6 +1003,7 @@ document.getElementById('rotateFab').addEventListener('click', ()=>{
 });
 document.getElementById('flipFab').addEventListener('click', ()=>{
   if(!state.pendingPiece) return;
+  if(!canFlipPiece(state.pendingPiece.key)) return;
   state.pendingPiece.flip = !state.pendingPiece.flip;
   renderAll();
 });
@@ -864,8 +1014,9 @@ document.getElementById('cancelFab').addEventListener('click', ()=>{
 
 function updateFabs(){
   const show = !!state.pendingPiece;
+  const showFlip = show && canFlipPiece(state.pendingPiece.key);
   document.getElementById('rotateFab').style.display = show?'flex':'none';
-  document.getElementById('flipFab').style.display = show?'flex':'none';
+  document.getElementById('flipFab').style.display = showFlip?'flex':'none';
   document.getElementById('cancelFab').style.display = show?'flex':'none';
 }
 
@@ -908,7 +1059,8 @@ function canPlacePieceKey(key){
     for(let c=0;c<GRID;c++){
       if(state.cells[r][c]) continue;
       for(let rot=0;rot<4;rot++){
-        for(const flip of [false,true]){
+        const flips = canFlipPiece(key) ? [false,true] : [false];
+        for(const flip of flips){
           if(evaluatePlacement(r,c,key,rot,flip).valid) return true;
         }
       }
@@ -1096,7 +1248,7 @@ function computeScore(){
     if(state.cells[r][c]) centralCount++;
   }
 
-  // errors: open ends not touching boundary-exit nor connecting neighbor
+  // errors: open ends not touching a matching exit nor connecting neighbor
   let errors=0;
   for(let r=0;r<GRID;r++)for(let c=0;c<GRID;c++){
     const cell = state.cells[r][c];
@@ -1106,8 +1258,9 @@ function computeScore(){
       if(!type) continue;
       const nr=r+DY[side], nc=c+DX[side];
       if(!inBounds(nr,nc)){
-        // per rulebook, reaching the outer edge of the board always counts as a valid end (not an error),
-        // regardless of whether it's an exit slot
+        if(exitAt(r,c,side) !== type){
+          errors++;
+        }
         continue;
       }
       const nb = state.cells[nr][nc];
@@ -1124,6 +1277,7 @@ function computeScore(){
 
 function finishGame(){
   state.gameOver=true;
+  document.querySelector('.wrap').classList.add('game-over');
   document.getElementById('rollBtn').disabled=true;
   document.getElementById('endRoundBtn').disabled=true;
   const score = computeScore();
@@ -1137,13 +1291,13 @@ function finishGame(){
     <div class="score-cell"><div class="num">7</div><div class="lbl">Kierrosta</div></div>
   `;
   document.getElementById('scoreTotal').textContent = score.total;
-  document.getElementById('scorePanel').style.display='block';
-  document.getElementById('scorePanel').scrollIntoView({behavior:'smooth', block:'start'});
+  document.getElementById('scorePanel').classList.remove('is-hidden');
   updateHint();
 }
 
 document.getElementById('newGameBtn').addEventListener('click', ()=>{
-  document.getElementById('scorePanel').style.display='none';
+  document.querySelector('.wrap').classList.remove('game-over');
+  document.getElementById('scorePanel').classList.add('is-hidden');
   document.getElementById('rollBtn').disabled=false;
   document.getElementById('endRoundBtn').disabled=true;
   state = freshState();
@@ -1168,6 +1322,10 @@ document.getElementById('rulesModal').addEventListener('click', (e)=>{
    ============================================================ */
 state = freshState();
 renderAll();
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
 
 })();
 </script>
