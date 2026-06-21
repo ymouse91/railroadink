@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Railroad Ink — Yksinpeli</title>
+<style>
+  :root{
+    --bg-deep:#0d3b66;
+    --bg-mid:#13568f;
+    --paper:#eef5fb;
+    --paper-line:#c7d9e8;
+    --ink:#13314f;
+    --ink-soft:#3c5c78;
+    --coral:#e0572f;
+    --coral-dark:#b8451f;
+    --rail:#13314f;
+    --road:#13314f;
+    --gold:#e0a72f;
+    --error:#d3402a;
+    --ok:#2f8a5f;
+    --panel:#ffffff;
+    --shadow:0 2px 10px rgba(13,59,102,.15);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:
+      radial-gradient(ellipse at top, var(--bg-mid), var(--bg-deep) 70%);
+    color:var(--ink);
+    min-height:100vh;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    -webkit-user-select:none;user-select:none;
+    overscroll-behavior:none;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:10px 10px 40px;}
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 4px 14px;
+    color:#fff;
+  }
+  header h1{
+    font-size:20px;margin:0;font-weight:800;letter-spacing:.3px;
+    display:flex;align-items:baseline;gap:8px;
+  }
+  header h1 .sub{font-size:11px;font-weight:500;opacity:.75;letter-spacing:.5px;text-transform:uppercase;}
+  .round-badge{
+    background:var(--coral);color:#fff;border-radius:999px;
+    padding:6px 14px;font-weight:800;font-size:13px;
+    box-shadow:var(--shadow);white-space:nowrap;
+  }
+
+  .panel{
+    background:var(--panel);border-radius:16px;box-shadow:var(--shadow);
+    padding:14px;margin-bottom:12px;
+  }
+
+  /* dice row */
+  .dice-row{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;}
+  .die{
+    flex:1 1 0;min-width:64px;
+    background:var(--paper);border:1.5px solid var(--paper-line);
+    border-radius:12px;padding:8px 4px 6px;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    position:relative;
+    transition:transform .12s, box-shadow .12s, border-color .12s;
+  }
+  .die.used{opacity:.35;}
+  .die.selectable{cursor:pointer;}
+  .die.selectable:active{transform:scale(.95);}
+  .die.selected{border-color:var(--coral);box-shadow:0 0 0 2px var(--coral) inset;}
+  .die svg{width:38px;height:38px;}
+  .die .label{font-size:9px;color:var(--ink-soft);text-align:center;line-height:1.2;font-weight:600;}
+  .die .check{
+    position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;
+    background:var(--ok);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;
+    font-weight:800;
+  }
+
+  .toolbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;}
+  .btn{
+    border:1.5px solid var(--paper-line);background:var(--paper);
+    color:var(--ink);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;
+    display:flex;align-items:center;gap:6px;cursor:pointer;
+  }
+  .btn:active{transform:scale(.96);}
+  .btn.primary{background:var(--coral);border-color:var(--coral-dark);color:#fff;}
+  .btn.ghost{background:transparent;}
+  .btn:disabled{opacity:.4;}
+  .btn-icon{font-size:15px;line-height:1;}
+  .spacer{flex:1;}
+
+  .hint{font-size:12px;color:var(--ink-soft);margin-top:8px;line-height:1.5;min-height:16px;}
+  .hint.warn{color:var(--coral-dark);font-weight:700;}
+
+  /* board */
+  .board-shell{
+    background:var(--panel);border-radius:16px;box-shadow:var(--shadow);
+    padding:14px;margin-bottom:12px;
+  }
+  .board-wrap{
+    position:relative;width:100%;
+    aspect-ratio:1/1;
+    background:var(--paper);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  svg#board{width:100%;height:100%;display:block;touch-action:manipulation;}
+  .cell-rect{fill:var(--paper);stroke:var(--paper-line);stroke-width:1;}
+  .cell-rect.central{fill:#e3edf6;}
+  .cell-rect.hoverable:active{fill:#dde9f4;}
+  .cell-rect.error{fill:#fbe2dd;}
+  .grid-major{stroke:var(--paper-line);stroke-width:1.5;}
+  .exit-arrow{fill:var(--coral);}
+  .exit-arrow.connected{fill:var(--ok);}
+  .route-line{fill:none;stroke:var(--rail);stroke-linecap:round;}
+  .route-highway{stroke-dasharray:6 4;}
+  .route-railway-tie{stroke:var(--rail);stroke-width:2;}
+  .station-dot{fill:var(--ink);}
+  .overpass-gap{stroke:var(--paper);}
+  .round-num{font-size:7px;fill:var(--ink-soft);font-weight:700;font-family:inherit;}
+  .ghost-piece{opacity:.55;pointer-events:none;}
+  .ghost-piece.invalid .route-line, .ghost-piece.invalid .route-railway-tie{stroke:var(--error)!important;}
+  .ghost-piece.invalid .station-dot{fill:var(--error)!important;}
+
+  .board-controls{
+    display:flex;justify-content:center;gap:10px;margin-top:10px;
+  }
+  .round-circle{
+    width:42px;height:42px;border-radius:50%;
+    background:var(--paper);border:1.5px solid var(--paper-line);
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;color:var(--ink);
+  }
+  .round-circle:active{transform:scale(.92);}
+
+  /* special routes strip */
+  .special-strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;}
+  .special-tile{
+    flex:0 0 auto;width:54px;
+    border:1.5px solid var(--paper-line);border-radius:10px;
+    background:var(--paper);padding:6px 4px 4px;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    position:relative;
+  }
+  .special-tile.used{opacity:.3;}
+  .special-tile.selectable{cursor:pointer;}
+  .special-tile.selected{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold) inset;}
+  .special-tile svg{width:32px;height:32px;}
+  .special-tile .label{font-size:8px;color:var(--ink-soft);text-align:center;font-weight:600;}
+
+  .section-title{font-size:11px;font-weight:800;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.6px;margin:0 0 8px;}
+
+  /* score panel */
+  .score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .score-cell{background:var(--paper);border-radius:10px;padding:8px 6px;text-align:center;}
+  .score-cell .num{font-size:20px;font-weight:800;color:var(--ink);}
+  .score-cell .lbl{font-size:9px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-top:2px;}
+  .score-total{
+    margin-top:10px;background:var(--coral);color:#fff;border-radius:10px;
+    padding:12px;text-align:center;
+  }
+  .score-total .num{font-size:30px;font-weight:800;}
+  .score-total .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.9;}
+
+  /* modal */
+  .modal-bg{
+    position:fixed;inset:0;background:rgba(13,59,102,.55);
+    display:none;align-items:center;justify-content:center;z-index:50;padding:20px;
+  }
+  .modal-bg.open{display:flex;}
+  .modal{
+    background:var(--panel);border-radius:16px;padding:20px;max-width:420px;width:100%;
+    max-height:85vh;overflow-y:auto;
+  }
+  .modal h2{margin:0 0 4px;font-size:18px;}
+  .modal p{font-size:13px;color:var(--ink-soft);line-height:1.5;}
+
+  .rotate-fab{
+    position:absolute;bottom:10px;right:10px;width:44px;height:44px;border-radius:50%;
+    background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:20px;box-shadow:var(--shadow);z-index:5;
+  }
+  .flip-fab{
+    position:absolute;bottom:10px;left:10px;width:44px;height:44px;border-radius:50%;
+    background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:18px;box-shadow:var(--shadow);z-index:5;
+  }
+  .cancel-fab{
+    position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;
+    background:var(--coral);color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:16px;box-shadow:var(--shadow);z-index:5;
+  }
+
+  footer{text-align:center;color:rgba(255,255,255,.5);font-size:10px;padding:10px 0 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Railroad Ink<span class="sub">Yksinpeli</span></h1>
+    <div class="round-badge" id="roundBadge">Kierros 1 / 7</div>
+  </header>
+
+  <div class="panel">
+    <div class="section-title">Tämän kierroksen nopat</div>
+    <div class="dice-row" id="diceRow"></div>
+    <div class="toolbar">
+      <button class="btn primary" id="rollBtn"><span class="btn-icon">⚀</span>Heitä nopat</button>
+      <button class="btn ghost" id="endRoundBtn" disabled>Lopeta kierros →</button>
+      <div class="spacer"></div>
+      <button class="btn ghost" id="rulesBtn">Säännöt</button>
+    </div>
+    <div class="hint" id="hintText">Heitä nopat aloittaaksesi kierroksen 1.</div>
+  </div>
+
+  <div class="panel">
+    <div class="section-title">Erikoisreitit <span style="font-weight:500;text-transform:none;">(max 1 / kierros, 3 / peli)</span></div>
+    <div class="special-strip" id="specialStrip"></div>
+  </div>
+
+  <div class="board-shell">
+    <div class="board-wrap">
+      <svg id="board" viewBox="0 0 700 700"></svg>
+      <div class="rotate-fab" id="rotateFab" style="display:none;">⟳</div>
+      <div class="flip-fab" id="flipFab" style="display:none;">⇋</div>
+      <div class="cancel-fab" id="cancelFab" style="display:none;">✕</div>
+    </div>
+    <div class="board-controls">
+      <div class="round-circle" id="undoBtn" title="Kumoa viimeisin">↶</div>
+    </div>
+  </div>
+
+  <div class="panel" id="scorePanel" style="display:none;">
+    <div class="section-title">Lopputulos</div>
+    <div class="score-grid" id="scoreGrid"></div>
+    <div class="score-total">
+      <div class="num" id="scoreTotal">0</div>
+      <div class="lbl">Yhteensä</div>
+    </div>
+    <div class="toolbar">
+      <button class="btn primary" id="newGameBtn" style="flex:1;justify-content:center;">Uusi peli</button>
+    </div>
+  </div>
+
+  <footer>Railroad Ink™ Hjalmar Hach &amp; Lorenzo Silva · fanin tekemä digisovellus omaan käyttöön</footer>
+</div>
+
+<div class="modal-bg" id="rulesModal">
+  <div class="modal">
+    <h2>Pikaohje</h2>
+    <p><b>1.</b> Heitä nopat. Saat 4 reittiä piirrettäväksi (kolme tavallista noppaa + erikoisnoppa, jossa asema/ylikulku).</p>
+    <p><b>2.</b> Napauta noppaa valitaksesi sen, napauta sitten ruutua laudalla asettaaksesi palan. Käännä ⟳ ja peilaa ⇋ tarpeen mukaan.</p>
+    <p><b>3.</b> Pala on liitettävä vähintään yhdeltä sivulta uloskäyntiin tai jo piirrettyyn reittiin. Punaisella reunalla näkyvä esikatselu = ei kelpaa.</p>
+    <p><b>4.</b> Maantietä (highway) ja rautatietä (railway) ei voi yhdistää suoraan — vain asemalla (station).</p>
+    <p><b>5.</b> Jokainen uloskäynti vaatii joko maantien tai rautatien — merkki nuolen sisällä kertoo kumman (katkoviiva = maantie, ratapölkyt = rautatie). Väärä reittityyppi ei kelpaa siihen uloskäyntiin.</p>
+    <p><b>6.</b> Voit käyttää myös erikoisreittejä (ylhäällä), enintään yhden per kierros ja kolme koko pelin aikana.</p>
+    <p><b>7.</b> Kun kaikki 4 noppaa on käytetty (tai et voi enää sijoittaa loppuja), lopeta kierros. 7 kierroksen jälkeen peli laskee pisteet automaattisesti.</p>
+    <p><b>Pisteet:</b> yhdistetyt uloskäynnit verkoittain, pisin yhtenäinen maantie, pisin yhtenäinen rautatie, keskialueen ruudut, miinus avoimet päät (virheet).</p>
+    <div class="toolbar"><button class="btn primary" id="closeRulesBtn" style="flex:1;justify-content:center;">Selvä</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   GEOMETRY / TILE DEFINITIONS
+   Each cell has 4 edge slots N,E,S,W. Each can be: null, 'h' (highway),
+   'r' (railway). A placed tile occupies the cell and defines which of
+   its edges are open (h/r) plus internal connectivity for scoring,
+   plus whether it's a station (connects h<->r in that cell) or an
+   overpass (h and r cross without connecting).
+   ============================================================ */
+
+const N=0,E=1,S=2,W=3;
+const OPP=[S,W,N,E];
+const DX=[0,1,0,-1], DY=[-1,0,1,0];
+
+// Base tile templates, defined with default orientation (rotation 0).
+// 'edges': array of 4 (N,E,S,W) each null/'h'/'r'
+// 'kind': for display + special rules
+const TILE_DEFS = {
+  straight_h: { name:'Suora maantie', edges:['h',null,'h',null], kind:'route' },
+  straight_r: { name:'Suora rautatie', edges:['r',null,'r',null], kind:'route' },
+  curved_h:   { name:'Kaartuva maantie', edges:['h','h',null,null], kind:'route' },
+  curved_r:   { name:'Kaartuva rautatie', edges:['r','r',null,null], kind:'route' },
+  tjunc_h:    { name:'T-risteys maantie', edges:['h','h',null,'h'], kind:'route' },
+  tjunc_r:    { name:'T-risteys rautatie', edges:['r','r',null,'r'], kind:'route' },
+  overpass:   { name:'Ylikulku', edges:['h','r','h','r'], kind:'overpass' },
+  station_s:  { name:'Suora asema', edges:['h',null,'r',null], kind:'station' },
+  station_c:  { name:'Kaartuva asema', edges:['r','h',null,null], kind:'station' },
+  // special routes (top of board)
+  sp_cross_h: { name:'Risteys (maantie)', edges:['h','h','h','h'], kind:'route', special:true },
+  sp_cross_r: { name:'Risteys (rautatie)', edges:['r','r','r','r'], kind:'route', special:true },
+  sp_3stat:   { name:'Kolmoisasema', edges:['h','r','h',null], kind:'station3', special:true },
+  sp_allstat: { name:'Neliasema', edges:['h','r','h','r'], kind:'station4', special:true },
+  sp_diag1:   { name:'Erikoiskaarre A', edges:['r','h',null,null], kind:'station', special:true },
+  sp_diag2:   { name:'Erikoiskaarre B', edges:['h',null,null,'r'], kind:'station', special:true },
+};
+
+// rotate edges array clockwise by 90*k degrees
+function rotateEdges(edges, k){
+  k=((k%4)+4)%4;
+  let e=edges.slice();
+  for(let i=0;i<k;i++){
+    e = [e[3],e[0],e[1],e[2]];
+  }
+  return e;
+}
+function flipEdges(edges){
+  // mirror left-right: swap E and W, N and S stay
+  return [edges[0], edges[3], edges[2], edges[1]];
+}
+
+/* ============================================================
+   DICE DEFINITIONS
+   3 "route" dice: 6 faces -> straight_h, straight_r, curved_h, curved_r, tjunc_h, tjunc_r
+   1 "special" die: 6 faces -> overpass, overpass, station_s, station_s, station_c, station_c
+   (rulebook: 1 die shows 3 kinds: overpass, straight station, curved station -> we give 2 faces each for a 6-sided die)
+   ============================================================ */
+const ROUTE_FACES = ['straight_h','straight_r','curved_h','curved_r','tjunc_h','tjunc_r'];
+const SPECIAL_FACES = ['overpass','overpass','station_s','station_s','station_c','station_c'];
+
+const SPECIAL_ROUTE_KEYS = ['sp_cross_h','sp_cross_r','sp_3stat','sp_allstat','sp_diag1','sp_diag2'];
+
+const GRID=7;
+const CENTRAL_MIN=2, CENTRAL_MAX=4; // 0-indexed central 3x3 -> rows/cols 2..4
+
+// Exits: list of {row,col,side,type} on the border, side = direction pointing OUTWARD from board.
+// type: 'h' (highway) or 'r' (railway) - only a route of the matching type may connect to that exit.
+// Exit types alternate around the perimeter of the board (going clockwise), matching the physical game board.
+const EXITS = (function(){
+  // ordered clockwise starting at top-left
+  const ordered = [
+    {row:0,col:1,side:N}, {row:0,col:3,side:N}, {row:0,col:5,side:N},
+    {row:1,col:6,side:E}, {row:3,col:6,side:E}, {row:5,col:6,side:E},
+    {row:6,col:5,side:S}, {row:6,col:3,side:S}, {row:6,col:1,side:S},
+    {row:5,col:0,side:W}, {row:3,col:0,side:W}, {row:1,col:0,side:W},
+  ];
+  ordered.forEach((ex,i)=>{ ex.type = (i%2===0) ? 'h' : 'r'; });
+  return ordered;
+})();
+
+/* ============================================================
+   GAME STATE
+   ============================================================ */
+let state = null;
+
+function freshState(){
+  const cells = [];
+  for(let r=0;r<GRID;r++){
+    const row=[];
+    for(let c=0;c<GRID;c++){
+      row.push(null); // null = empty, else {key, rot, flip, edges, kind, round}
+    }
+    cells.push(row);
+  }
+  return {
+    round: 1,
+    maxRounds: 7,
+    cells,
+    diceFaces: [], // current round's 4 faces (keys into TILE_DEFS), with used flag
+    diceUsed: [false,false,false,false],
+    specialUsedThisRound: false,
+    specialUsedTotal: 0,
+    specialUsed: {}, // key -> true
+    history: [], // stack of {r,c,prevValue} for undo within current placements (only current round undoable fully; past rounds locked conceptually but we keep simple undo overall)
+    selectedDie: null, // index into diceFaces or {special:key}
+    pendingPiece: null, // {key, rot, flip, validCellSet}
+    gameOver: false,
+  };
+}
+
+function cellKeyAt(r,c){ return state.cells[r][c]; }
+function inBounds(r,c){ return r>=0 && r<GRID && c>=0 && c<GRID; }
+function isCentral(r,c){ return r>=CENTRAL_MIN && r<=CENTRAL_MAX && c>=CENTRAL_MIN && c<=CENTRAL_MAX; }
+
+function exitAt(r,c,side){
+  const ex = EXITS.find(ex=>ex.row===r && ex.col===c && ex.side===side);
+  return ex ? ex.type : null;
+}
+
+/* Determine the edges array for a piece given key+rot+flip */
+function computeEdges(key, rot, flip){
+  let base = TILE_DEFS[key].edges;
+  let e = flip ? flipEdges(base) : base.slice();
+  e = rotateEdges(e, rot);
+  return e;
+}
+
+/* Check whether placing this piece at (r,c) is "connected" per rules:
+   at least one open edge must touch either an exit (board boundary at that exit) OR
+   an existing route edge on the neighboring cell that matches (same type h/h or r/r)
+   on the touching side, OR a station/overpass bridging where appropriate.
+   We also must not directly connect highway to railway without a station tile.
+*/
+function evaluatePlacement(r,c,key,rot,flip){
+  const edges = computeEdges(key, rot, flip);
+  const def = TILE_DEFS[key];
+  let connected = false;
+  let conflict = false; // overlapping incompatible connection
+  const reasons = [];
+
+  if(cellKeyAt(r,c)){
+    return {valid:false, edges, reason:'occupied'};
+  }
+
+  for(let side=0; side<4; side++){
+    const myType = edges[side]; // null/h/r
+    if(myType===null) continue;
+    const nr = r+DY[side], nc = c+DX[side];
+    if(!inBounds(nr,nc)){
+      // touches board boundary - only counts as a valid connection if there's an exit here
+      // AND the exit's required type (highway/railway) matches this route's type
+      const exitType = exitAt(r,c,side);
+      if(exitType){
+        if(exitType === myType){
+          connected = true;
+        }
+        // if the exit exists but requires the other type, this edge does NOT connect here;
+        // it's simply an open end facing the boundary (still allowed to place, but won't
+        // count as the connecting edge - if it's the only touching edge, placement fails below)
+      }
+      // if boundary but not an exit at all -> just an open end (allowed, becomes error at scoring)
+      continue;
+    }
+    const neighbor = cellKeyAt(nr,nc);
+    if(!neighbor){
+      continue; // open into empty cell, fine (will be error if never filled)
+    }
+    const theirEdges = neighbor.edges;
+    const theirType = theirEdges[OPP[side]];
+    if(theirType===null){
+      // neighbor exists but has no connecting edge here -> just touches without connecting, fine geometrically
+      continue;
+    }
+    // both sides have a route facing each other
+    if(theirType===myType){
+      connected = true;
+    } else {
+      // h meets r directly -> only ok if one of the two tiles is a station bridging them at THIS edge
+      // Since edges already encode h or r explicitly (stations have both h and r edges on different sides),
+      // a direct h-r meeting at the same shared edge is always invalid (must differ via station's two edges, not same edge).
+      conflict = true;
+    }
+  }
+
+  return {valid: connected && !conflict, edges, connected, conflict};
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+const svg = document.getElementById('board');
+const SVG_SIZE = 700;
+const BOARD_MARGIN = 34; // space around the grid reserved for exit markers
+const GRID_SIZE = SVG_SIZE - BOARD_MARGIN*2;
+const CELL = GRID_SIZE / GRID;
+function gx(c){ return BOARD_MARGIN + c*CELL; }
+function gy(r){ return BOARD_MARGIN + r*CELL; }
+
+function svgEl(tag, attrs){
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for(const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+
+function clearSvg(){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
+
+function drawBoard(){
+  clearSvg();
+  // background cells
+  for(let r=0;r<GRID;r++){
+    for(let c=0;c<GRID;c++){
+      const rect = svgEl('rect',{
+        x:gx(c), y:gy(r), width:CELL, height:CELL,
+        class:'cell-rect'+(isCentral(r,c)?' central':'')+' hoverable',
+        'data-r':r,'data-c':c
+      });
+      svg.appendChild(rect);
+    }
+  }
+  // central area border
+  svg.appendChild(svgEl('rect',{
+    x:gx(CENTRAL_MIN), y:gy(CENTRAL_MIN), width:3*CELL, height:3*CELL,
+    fill:'none', stroke:'#e0572f', 'stroke-width':1.5, 'stroke-dasharray':'4 3'
+  }));
+  // outer border
+  svg.appendChild(svgEl('rect',{x:BOARD_MARGIN,y:BOARD_MARGIN,width:GRID_SIZE,height:GRID_SIZE,fill:'none',stroke:'#13314f','stroke-width':3}));
+
+  // exits
+  EXITS.forEach(ex=>{
+    drawExitArrow(ex);
+  });
+
+  // placed pieces
+  for(let r=0;r<GRID;r++){
+    for(let c=0;c<GRID;c++){
+      const cell = state.cells[r][c];
+      if(cell){
+        drawPieceInCell(r,c,cell.edges,cell.kind,false);
+        drawRoundNumber(r,c,cell.round);
+      }
+    }
+  }
+
+  // ghost preview
+  if(state.pendingPiece && state.pendingPiece.previewCell){
+    const {r,c} = state.pendingPiece.previewCell;
+    const edges = computeEdges(state.pendingPiece.key, state.pendingPiece.rot, state.pendingPiece.flip);
+    const evalR = evaluatePlacement(r,c,state.pendingPiece.key,state.pendingPiece.rot,state.pendingPiece.flip);
+    drawPieceInCell(r,c,edges,TILE_DEFS[state.pendingPiece.key].kind, true, !evalR.valid);
+  }
+
+  attachBoardEvents();
+}
+
+function drawExitArrow(ex){
+  const cx = gx(ex.col) + CELL/2;
+  const cy = gy(ex.row) + CELL/2;
+  let x,y,rotate;
+  const len = BOARD_MARGIN - 1, half=10;
+  // anchor point sits on the grid edge; the triangle points outward into the margin
+  if(ex.side===N){ x=cx; y=BOARD_MARGIN; rotate=0; }
+  if(ex.side===S){ x=cx; y=SVG_SIZE-BOARD_MARGIN; rotate=180; }
+  if(ex.side===W){ x=BOARD_MARGIN; y=cy; rotate=270; }
+  if(ex.side===E){ x=SVG_SIZE-BOARD_MARGIN; y=cy; rotate=90; }
+  const connected = exitIsConnected(ex);
+  const g = svgEl('g',{transform:`translate(${x},${y}) rotate(${rotate})`});
+  const tri = svgEl('path',{
+    d:`M ${-half} 0 L 0 ${-len} L ${half} 0 Z`,
+    class:'exit-arrow'+(connected?' connected':'')
+  });
+  g.appendChild(tri);
+  if(ex.type==='h'){
+    // dashed line through the arrow marks this exit requires a highway
+    g.appendChild(svgEl('line',{
+      x1:0,y1:-len+5, x2:0,y2:-3,
+      stroke:'#ffffff','stroke-width':2.2,'stroke-dasharray':'3 2.5','stroke-linecap':'round'
+    }));
+  } else if(ex.type==='r'){
+    // tie marks through the arrow mark this exit requires a railway
+    const steps=7;
+    for(let i=0;i<steps;i++){
+      const ty = -len+6 + i*((len-12)/(steps-1));
+      const tw = 2.6 + (i/(steps-1))*4.2;
+      g.appendChild(svgEl('line',{x1:-tw,y1:ty,x2:tw,y2:ty,stroke:'#ffffff','stroke-width':1.4}));
+    }
+    g.appendChild(svgEl('line',{x1:0,y1:-len+5,x2:0,y2:-2,stroke:'#ffffff','stroke-width':1.8}));
+  }
+  svg.appendChild(g);
+}
+
+function exitIsConnected(ex){
+  const cell = state.cells[ex.row][ex.col];
+  if(!cell) return false;
+  return cell.edges[ex.side] === ex.type;
+}
+
+function drawRoundNumber(r,c,round){
+  if(!round) return;
+  const t = svgEl('text',{
+    x:gx(c)+5, y:gy(r)+11, class:'round-num'
+  });
+  t.textContent = round;
+  svg.appendChild(t);
+}
+
+function drawPieceInCell(r,c,edges,kind,isGhost,isInvalid){
+  const cx = gx(c)+CELL/2, cy = gy(r)+CELL/2;
+  const g = svgEl('g',{
+    class:'piece'+(isGhost?' ghost-piece'+(isInvalid?' invalid':''):''),
+    'data-r':r,
+    'data-c':c
+  });
+
+  const half = CELL/2;
+  const armLen = half*0.92;
+
+  // helper to draw an arm from center toward a side
+  function arm(side, type, offsetPerp){
+    let dx=DX[side]*armLen, dy=DY[side]*armLen;
+    let ox=0, oy=0;
+    if(offsetPerp){
+      if(side===N||side===S){ ox=offsetPerp; } else { oy=offsetPerp; }
+    }
+    const x1=cx+ox, y1=cy+oy, x2=cx+dx+ox, y2=cy+dy+oy;
+    if(type==='h'){
+      g.appendChild(svgEl('line',{x1,y1,x2,y2,class:'route-line route-highway','stroke-width':3}));
+    } else if(type==='r'){
+      g.appendChild(svgEl('line',{x1,y1,x2,y2,class:'route-line','stroke-width':3}));
+      // ties
+      const steps=4;
+      for(let i=1;i<=steps;i++){
+        const t=i/(steps+1);
+        const px=x1+(x2-x1)*t, py=y1+(y2-y1)*t;
+        const perpX = (side===N||side===S)?6:0;
+        const perpY = (side===E||side===W)?6:0;
+        g.appendChild(svgEl('line',{x1:px-perpX,y1:py-perpY,x2:px+perpX,y2:py+perpY,class:'route-railway-tie','stroke-width':1.6}));
+      }
+    }
+  }
+
+  if(kind==='overpass'){
+    // h crosses r without connecting: draw h straight one way, r straight other way, with gap
+    arm(N,'h'); arm(S,'h');
+    arm(E,'r'); arm(W,'r');
+    // small gap blocker in middle for the underneath one (railway) - draw white squares
+    g.appendChild(svgEl('rect',{x:cx-9,y:cy-3,width:18,height:6,fill:'var(--paper)'}));
+    g.appendChild(svgEl('line',{x1:cx-9,y1:cy,x2:cx+9,y2:cy,stroke:'var(--rail)','stroke-width':3,class:'route-highway'}));
+  } else if(kind==='station' || kind==='station3' || kind==='station4'){
+    for(let s=0;s<4;s++){
+      if(edges[s]) arm(s, edges[s]);
+    }
+    g.appendChild(svgEl('circle',{cx,cy,r:7,class:'station-dot'}));
+  } else {
+    for(let s=0;s<4;s++){
+      if(edges[s]) arm(s, edges[s]);
+    }
+  }
+
+  svg.appendChild(g);
+}
+
+/* ============================================================
+   BOARD INTERACTION
+   ============================================================ */
+function attachBoardEvents(){
+  svg.querySelectorAll('.cell-rect').forEach(rect=>{
+    rect.addEventListener('click', onCellClick);
+  });
+  svg.querySelectorAll('.piece').forEach(piece=>{
+    piece.addEventListener('click', onCellClick);
+  });
+}
+
+function onCellClick(e){
+  const cellEl = e.target.closest('[data-r][data-c]');
+  if(!cellEl) return;
+  const r = parseInt(cellEl.getAttribute('data-r'));
+  const c = parseInt(cellEl.getAttribute('data-c'));
+  if(!state.pendingPiece){
+    removeCurrentRoundPiece(r,c);
+    return;
+  }
+  if(state.pendingPiece.previewCell && state.pendingPiece.previewCell.r===r && state.pendingPiece.previewCell.c===c){
+    // second tap on same cell = confirm placement if valid
+    confirmPlacement(r,c);
+  } else {
+    state.pendingPiece.previewCell = {r,c};
+    drawBoard();
+    updateHint();
+  }
+}
+
+function confirmPlacement(r,c){
+  const pp = state.pendingPiece;
+  const evalR = evaluatePlacement(r,c,pp.key,pp.rot,pp.flip);
+  if(!evalR.valid){
+    flashInvalid();
+    return;
+  }
+  state.cells[r][c] = {
+    key: pp.key, rot: pp.rot, flip: pp.flip,
+    edges: evalR.edges, kind: TILE_DEFS[pp.key].kind,
+    round: state.round, source: pp.source, dieIndex: pp.dieIndex
+  };
+  state.history.push({r,c, source: pp.source, dieIndex: pp.dieIndex, key: pp.key});
+
+  // mark die or special used
+  if(pp.source==='die'){
+    state.diceUsed[pp.dieIndex] = true;
+  } else if(pp.source==='special'){
+    state.specialUsed[pp.key] = true;
+    state.specialUsedTotal++;
+    state.specialUsedThisRound = true;
+  }
+
+  state.pendingPiece = null;
+  state.selectedDie = null;
+  renderAll();
+}
+
+function releasePieceUse(cell){
+  if(!cell) return;
+  if(cell.source==='special' || SPECIAL_ROUTE_KEYS.includes(cell.key)){
+    delete state.specialUsed[cell.key];
+    state.specialUsedTotal = Math.max(0, state.specialUsedTotal-1);
+    state.specialUsedThisRound = Object.values(state.cells)
+      .flat()
+      .some(c=>c && c.round===state.round && (c.source==='special' || SPECIAL_ROUTE_KEYS.includes(c.key)) && c!==cell);
+    return;
+  }
+  if(typeof cell.dieIndex==='number'){
+    state.diceUsed[cell.dieIndex] = false;
+    return;
+  }
+  const idx = state.diceFaces.findIndex((f,i)=>f===cell.key && state.diceUsed[i]);
+  if(idx>=0) state.diceUsed[idx]=false;
+}
+
+function removeCurrentRoundPiece(r,c){
+  const cell = state.cells[r][c];
+  if(!cell) return;
+  const hint=document.getElementById('hintText');
+  if(cell.round !== state.round){
+    hint.textContent='Et voi muuttaa edellisten kierrosten reittejÃ¤.';
+    return;
+  }
+  releasePieceUse(cell);
+  state.cells[r][c] = null;
+  state.history = state.history.filter(h=>!(h.r===r && h.c===c));
+  renderAll();
+}
+
+function flashInvalid(){
+  const hint = document.getElementById('hintText');
+  hint.classList.add('warn');
+  hint.textContent = 'Tämä sijoitus ei kelpaa: palan on liityttävä uloskäyntiin tai olemassa olevaan reittiin, eikä maantie ja rautatie voi kohdata suoraan.';
+  setTimeout(()=>{ hint.classList.remove('warn'); updateHint(); }, 2200);
+}
+
+/* ============================================================
+   DICE / SPECIAL UI
+   ============================================================ */
+function rollDice(){
+  state.diceFaces = [];
+  for(let i=0;i<3;i++){
+    state.diceFaces.push(ROUTE_FACES[Math.floor(Math.random()*ROUTE_FACES.length)]);
+  }
+  state.diceFaces.push(SPECIAL_FACES[Math.floor(Math.random()*SPECIAL_FACES.length)]);
+  state.diceUsed = [false,false,false,false];
+  state.specialUsedThisRound = false;
+  state.selectedDie = null;
+  state.pendingPiece = null;
+  renderAll();
+}
+
+function tileMiniSvg(key, size, rot, flip){
+  const edges = TILE_DEFS[key].edges;
+  const kind = TILE_DEFS[key].kind;
+  const s = size||38;
+  const c = s/2, arm = s*0.42;
+  let inner = '';
+  function lineFor(side,type){
+    const dx=DX[side]*arm, dy=DY[side]*arm;
+    if(type==='h'){
+      return `<line x1="${c}" y1="${c}" x2="${c+dx}" y2="${c+dy}" stroke="#13314f" stroke-width="2.6" stroke-dasharray="4 3" stroke-linecap="round"/>`;
+    } else if(type==='r'){
+      let l = `<line x1="${c}" y1="${c}" x2="${c+dx}" y2="${c+dy}" stroke="#13314f" stroke-width="2.6" stroke-linecap="round"/>`;
+      const steps=3;
+      for(let i=1;i<=steps;i++){
+        const t=i/(steps+1);
+        const px=c+dx*t, py=c+dy*t;
+        const perpX=(side===N||side===S)?4:0, perpY=(side===E||side===W)?4:0;
+        l += `<line x1="${px-perpX}" y1="${py-perpY}" x2="${px+perpX}" y2="${py+perpY}" stroke="#13314f" stroke-width="1.3"/>`;
+      }
+      return l;
+    }
+    return '';
+  }
+  if(kind==='overpass'){
+    inner += lineFor(N,'h')+lineFor(S,'h')+lineFor(E,'r')+lineFor(W,'r');
+    inner += `<rect x="${c-7}" y="${c-2.5}" width="14" height="5" fill="#eef5fb"/><line x1="${c-7}" y1="${c}" x2="${c+7}" y2="${c}" stroke="#13314f" stroke-width="2.6" stroke-dasharray="4 3"/>`;
+  } else {
+    for(let s2=0;s2<4;s2++){ if(edges[s2]) inner+=lineFor(s2,edges[s2]); }
+    if(kind!=='route') inner += `<circle cx="${c}" cy="${c}" r="4.5" fill="#13314f"/>`;
+  }
+  const angle = ((rot||0)%4)*90;
+  const scaleX = flip ? -1 : 1;
+  const transform = `translate(${c} ${c}) rotate(${angle}) scale(${scaleX} 1) translate(${-c} ${-c})`;
+  return `<svg viewBox="0 0 ${s} ${s}" width="${s}" height="${s}"><g transform="${transform}">${inner}</g></svg>`;
+}
+
+function renderDice(){
+  const row = document.getElementById('diceRow');
+  row.innerHTML='';
+  if(state.diceFaces.length===0){
+    row.innerHTML = '<div style="font-size:12px;color:var(--ink-soft);padding:10px 4px;">Heitä nopat aloittaaksesi.</div>';
+    return;
+  }
+  state.diceFaces.forEach((key,i)=>{
+    const used = state.diceUsed[i];
+    const selected = state.selectedDie===i && state.pendingPiece && state.pendingPiece.source==='die';
+    const rot = selected ? state.pendingPiece.rot : 0;
+    const flip = selected ? state.pendingPiece.flip : false;
+    const div = document.createElement('div');
+    div.className = 'die'+(used?' used':' selectable')+(state.selectedDie===i?' selected':'');
+    div.innerHTML = tileMiniSvg(key,38,rot,flip) + `<div class="label">${TILE_DEFS[key].name}</div>` + (used?'<div class="check">✓</div>':'');
+    if(!used){
+      div.addEventListener('click', ()=>selectDie(i));
+    }
+    row.appendChild(div);
+  });
+}
+
+function selectDie(i){
+  if(state.diceUsed[i]) return;
+  if(state.selectedDie===i && state.pendingPiece && state.pendingPiece.source==='die'){
+    // already selected -> tapping again rotates the piece 90 degrees
+    state.pendingPiece.rot = (state.pendingPiece.rot+1)%4;
+    renderAll();
+    return;
+  }
+  state.selectedDie = i;
+  const key = state.diceFaces[i];
+  state.pendingPiece = {key, rot:0, flip:false, source:'die', dieIndex:i, previewCell:null};
+  renderAll();
+}
+
+function renderSpecial(){
+  const strip = document.getElementById('specialStrip');
+  strip.innerHTML='';
+  SPECIAL_ROUTE_KEYS.forEach(key=>{
+    const used = !!state.specialUsed[key];
+    const blocked = used || state.specialUsedThisRound || state.specialUsedTotal>=3;
+    const selected = state.selectedDie==='sp_'+key && state.pendingPiece && state.pendingPiece.source==='special';
+    const rot = selected ? state.pendingPiece.rot : 0;
+    const flip = selected ? state.pendingPiece.flip : false;
+    const div = document.createElement('div');
+    div.className = 'special-tile'+(used?' used':'')+(!blocked?' selectable':'')+(state.selectedDie==='sp_'+key?' selected':'');
+    div.innerHTML = tileMiniSvg(key,32,rot,flip) + `<div class="label">${TILE_DEFS[key].name}</div>`;
+    if(!blocked){
+      div.addEventListener('click', ()=>selectSpecial(key));
+    } else if(!used){
+      div.style.opacity='0.45';
+    }
+    strip.appendChild(div);
+  });
+}
+
+function selectSpecial(key){
+  if(state.selectedDie==='sp_'+key && state.pendingPiece && state.pendingPiece.source==='special'){
+    state.pendingPiece.rot = (state.pendingPiece.rot+1)%4;
+    renderAll();
+    return;
+  }
+  state.selectedDie = 'sp_'+key;
+  state.pendingPiece = {key, rot:0, flip:false, source:'special', previewCell:null};
+  renderAll();
+}
+
+document.getElementById('rotateFab').addEventListener('click', ()=>{
+  if(!state.pendingPiece) return;
+  state.pendingPiece.rot = (state.pendingPiece.rot+1)%4;
+  renderAll();
+});
+document.getElementById('flipFab').addEventListener('click', ()=>{
+  if(!state.pendingPiece) return;
+  state.pendingPiece.flip = !state.pendingPiece.flip;
+  renderAll();
+});
+document.getElementById('cancelFab').addEventListener('click', ()=>{
+  state.pendingPiece=null; state.selectedDie=null;
+  renderAll();
+});
+
+function updateFabs(){
+  const show = !!state.pendingPiece;
+  document.getElementById('rotateFab').style.display = show?'flex':'none';
+  document.getElementById('flipFab').style.display = show?'flex':'none';
+  document.getElementById('cancelFab').style.display = show?'flex':'none';
+}
+
+/* ============================================================
+   UNDO
+   ============================================================ */
+document.getElementById('undoBtn').addEventListener('click', ()=>{
+  if(state.pendingPiece){
+    state.pendingPiece=null; state.selectedDie=null; renderAll(); return;
+  }
+  const last = state.history.pop();
+  if(!last) return;
+  const cell = state.cells[last.r][last.c];
+  if(!cell) return;
+  if(cell.round !== state.round){
+    // refuse to undo past rounds (locked), put it back
+    state.history.push(last);
+    const hint=document.getElementById('hintText');
+    hint.textContent='Et voi muuttaa edellisten kierrosten reittejä.';
+    return;
+  }
+  releasePieceUse(cell);
+  state.cells[last.r][last.c] = null;
+  renderAll();
+});
+
+/* ============================================================
+   ROUND FLOW
+   ============================================================ */
+document.getElementById('rollBtn').addEventListener('click', ()=>{
+  rollDice();
+  document.getElementById('rollBtn').disabled = true;
+  updateEndRoundButton();
+});
+
+document.getElementById('endRoundBtn').addEventListener('click', endRound);
+
+function canPlacePieceKey(key){
+  for(let r=0;r<GRID;r++){
+    for(let c=0;c<GRID;c++){
+      if(state.cells[r][c]) continue;
+      for(let rot=0;rot<4;rot++){
+        for(const flip of [false,true]){
+          if(evaluatePlacement(r,c,key,rot,flip).valid) return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+function updateEndRoundButton(){
+  const btn = document.getElementById('endRoundBtn');
+  btn.disabled = state.gameOver || state.diceFaces.length===0 || !!state.pendingPiece || !allDiceUsedOrUnplaceable();
+}
+
+function endRound(){
+  if(!allDiceUsedOrUnplaceable()){
+    const hint=document.getElementById('hintText');
+    hint.classList.add('warn');
+    hint.textContent='Et voi lopettaa kierrosta vielä: sijoita kaikki mahdolliset nopan reitit ensin.';
+    return;
+  }
+  if(state.round >= state.maxRounds){
+    finishGame();
+    return;
+  }
+  state.round++;
+  state.diceFaces=[];
+  state.diceUsed=[false,false,false,false];
+  state.selectedDie=null;
+  state.pendingPiece=null;
+  state.history=[];
+  document.getElementById('rollBtn').disabled=false;
+  document.getElementById('endRoundBtn').disabled=true;
+  renderAll();
+}
+
+function allDiceUsedOrUnplaceable(){
+  if(state.diceFaces.length===0) return false;
+  return state.diceFaces.every((key,i)=>state.diceUsed[i] || !canPlacePieceKey(key));
+}
+
+function updateHint(){
+  const hint = document.getElementById('hintText');
+  hint.classList.remove('warn');
+  if(state.gameOver){ hint.textContent='Peli päättyi! Katso pisteet alta.'; return; }
+  if(state.diceFaces.length===0){
+    hint.textContent = `Heitä nopat aloittaaksesi kierroksen ${state.round}.`;
+    return;
+  }
+  if(state.pendingPiece){
+    if(state.pendingPiece.previewCell){
+      hint.textContent = 'Napauta samaa ruutua uudelleen vahvistaaksesi sijoituksen, tai valitse toinen ruutu. ⟳ kääntää, ⇋ peilaa.';
+    } else {
+      hint.textContent = 'Napauta ruutua laudalla asettaaksesi valitun palan, tai napauta noppaa uudelleen kääntääksesi sitä.';
+    }
+    return;
+  }
+  const remaining = state.diceUsed.filter(u=>!u).length;
+  if(remaining>0){
+    hint.textContent = `${remaining} reittiä vielä piirtämättä tällä kierroksella. Napauta noppaa valitaksesi sen.`;
+  } else {
+    hint.textContent = 'Kaikki tämän kierroksen reitit piirretty. Voit vielä käyttää erikoisreitin, tai lopeta kierros.';
+  }
+}
+
+function renderAll(){
+  renderDice();
+  renderSpecial();
+  drawBoard();
+  updateFabs();
+  updateHint();
+  updateEndRoundButton();
+  document.getElementById('roundBadge').textContent = `Kierros ${Math.min(state.round,state.maxRounds)} / ${state.maxRounds}`;
+}
+
+/* ============================================================
+   SCORING
+   ============================================================ */
+function computeScore(){
+  // Networks: union-find over all route cells (h connects to h, r connects to r across matching shared edges,
+  // plus stations connect h<->r within same cell, plus exits act as virtual nodes -- but only when the
+  // route's type matches the exit's required type)
+  function cellNodeId(r,c){ return `cell_${r}_${c}`; }
+  function exitNodeId(idx){ return `exit_${idx}`; }
+
+  const parent2 = {};
+  function find2(x){ if(parent2[x]===undefined) parent2[x]=x; if(parent2[x]!==x) parent2[x]=find2(parent2[x]); return parent2[x]; }
+  function union2(a,b){ const ra=find2(a), rb=find2(b); if(ra!==rb) parent2[ra]=rb; }
+  function nodeFor(r,c,side){
+    const cell = state.cells[r][c];
+    if(cell && cell.kind==='overpass'){
+      const type = cell.edges[side];
+      return `cell_${r}_${c}_${type}`; // separate node per type for overpass
+    }
+    return cellNodeId(r,c);
+  }
+  for(let r=0;r<GRID;r++)for(let c=0;c<GRID;c++){
+    if(state.cells[r][c]) find2(cellNodeId(r,c));
+  }
+  EXITS.forEach((ex,i)=>find2(exitNodeId(i)));
+  for(let r=0;r<GRID;r++)for(let c=0;c<GRID;c++){
+    const cell = state.cells[r][c];
+    if(!cell) continue;
+    for(let side=0;side<4;side++){
+      const type = cell.edges[side];
+      if(!type) continue;
+      const myNode = nodeFor(r,c,side);
+      const nr=r+DY[side], nc=c+DX[side];
+      if(inBounds(nr,nc)){
+        const nb = state.cells[nr][nc];
+        if(nb && nb.edges[OPP[side]]===type){
+          const otherNode = nodeFor(nr,nc,OPP[side]);
+          union2(myNode, otherNode);
+        }
+      } else {
+        const exIdx = EXITS.findIndex(ex=>ex.row===r&&ex.col===c&&ex.side===side);
+        if(exIdx>=0 && EXITS[exIdx].type===type) union2(myNode, exitNodeId(exIdx));
+      }
+    }
+  }
+
+  // group exits by root
+  const groups = {};
+  EXITS.forEach((ex,i)=>{
+    const root = find2(exitNodeId(i));
+    groups[root] = (groups[root]||0)+1;
+  });
+  const NETWORK_VALUES = {2:4,3:8,4:12,5:16,6:20,7:24,8:28,9:32,10:36,11:40,12:45};
+  let networkPoints = 0;
+  Object.values(groups).forEach(count=>{
+    if(count>=2){
+      networkPoints += NETWORK_VALUES[count] || (count>12 ? 45+(count-12)*4 : 0);
+    }
+  });
+
+  // Longest highway / railway: longest simple path along connected same-type cells (no branching counted, per rules "single branch")
+  // We approximate: build adjacency graph of cells per type, then find longest path via DFS with memo (small board, ok).
+  function longestChain(type){
+    // adjacency: cell -> connected neighbor cells (same type, matching edge)
+    const adj = {};
+    function key(r,c){return r+'_'+c;}
+    for(let r=0;r<GRID;r++)for(let c=0;c<GRID;c++){
+      const cell = state.cells[r][c];
+      if(!cell) continue;
+      const hasType = cell.edges.includes(type);
+      if(!hasType) continue;
+      adj[key(r,c)] = adj[key(r,c)] || [];
+      for(let side=0;side<4;side++){
+        if(cell.edges[side]!==type) continue;
+        const nr=r+DY[side], nc=c+DX[side];
+        if(!inBounds(nr,nc)) continue;
+        const nb = state.cells[nr][nc];
+        if(nb && nb.edges[OPP[side]]===type){
+          adj[key(r,c)].push(key(nr,nc));
+        }
+      }
+    }
+    let best = 0;
+    const nodes = Object.keys(adj);
+    if(nodes.length===0) return 0;
+    // For each node, DFS longest simple path (graph is sparse/path-like in practice; board max 49 cells, acceptable)
+    function dfs(node, visited){
+      visited.add(node);
+      let m = 1;
+      (adj[node]||[]).forEach(nb=>{
+        if(!visited.has(nb)){
+          const r = 1+dfs(nb, visited);
+          if(r>m) m=r;
+        }
+      });
+      visited.delete(node);
+      return m;
+    }
+    nodes.forEach(n=>{
+      const r = dfs(n, new Set());
+      if(r>best) best=r;
+    });
+    return best;
+  }
+  const longestHighway = longestChain('h');
+  const longestRailway = longestChain('r');
+
+  // central spaces
+  let centralCount=0;
+  for(let r=CENTRAL_MIN;r<=CENTRAL_MAX;r++)for(let c=CENTRAL_MIN;c<=CENTRAL_MAX;c++){
+    if(state.cells[r][c]) centralCount++;
+  }
+
+  // errors: open ends not touching boundary-exit nor connecting neighbor
+  let errors=0;
+  for(let r=0;r<GRID;r++)for(let c=0;c<GRID;c++){
+    const cell = state.cells[r][c];
+    if(!cell) continue;
+    for(let side=0;side<4;side++){
+      const type=cell.edges[side];
+      if(!type) continue;
+      const nr=r+DY[side], nc=c+DX[side];
+      if(!inBounds(nr,nc)){
+        // per rulebook, reaching the outer edge of the board always counts as a valid end (not an error),
+        // regardless of whether it's an exit slot
+        continue;
+      }
+      const nb = state.cells[nr][nc];
+      if(!nb || nb.edges[OPP[side]]!==type){
+        errors++;
+      }
+    }
+  }
+
+  const total = networkPoints + longestHighway + longestRailway + centralCount - errors;
+
+  return {networkPoints, longestHighway, longestRailway, centralCount, errors, total};
+}
+
+function finishGame(){
+  state.gameOver=true;
+  document.getElementById('rollBtn').disabled=true;
+  document.getElementById('endRoundBtn').disabled=true;
+  const score = computeScore();
+  const grid = document.getElementById('scoreGrid');
+  grid.innerHTML = `
+    <div class="score-cell"><div class="num">${score.networkPoints}</div><div class="lbl">Verkot</div></div>
+    <div class="score-cell"><div class="num">${score.longestHighway}</div><div class="lbl">Pisin maantie</div></div>
+    <div class="score-cell"><div class="num">${score.longestRailway}</div><div class="lbl">Pisin rautatie</div></div>
+    <div class="score-cell"><div class="num">${score.centralCount}</div><div class="lbl">Keskialue</div></div>
+    <div class="score-cell"><div class="num">-${score.errors}</div><div class="lbl">Virheet</div></div>
+    <div class="score-cell"><div class="num">7</div><div class="lbl">Kierrosta</div></div>
+  `;
+  document.getElementById('scoreTotal').textContent = score.total;
+  document.getElementById('scorePanel').style.display='block';
+  document.getElementById('scorePanel').scrollIntoView({behavior:'smooth', block:'start'});
+  updateHint();
+}
+
+document.getElementById('newGameBtn').addEventListener('click', ()=>{
+  document.getElementById('scorePanel').style.display='none';
+  document.getElementById('rollBtn').disabled=false;
+  document.getElementById('endRoundBtn').disabled=true;
+  state = freshState();
+  renderAll();
+});
+
+/* ============================================================
+   RULES MODAL
+   ============================================================ */
+document.getElementById('rulesBtn').addEventListener('click', ()=>{
+  document.getElementById('rulesModal').classList.add('open');
+});
+document.getElementById('closeRulesBtn').addEventListener('click', ()=>{
+  document.getElementById('rulesModal').classList.remove('open');
+});
+document.getElementById('rulesModal').addEventListener('click', (e)=>{
+  if(e.target.id==='rulesModal') document.getElementById('rulesModal').classList.remove('open');
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+state = freshState();
+renderAll();
+
+})();
+</script>
+</body>
+</html>
