@@ -306,8 +306,12 @@
     footer{display:none;}
   }
 
+  @media (max-width: 1280px) and (orientation: landscape){
+    .game-layout{grid-template-columns:minmax(0,calc(100dvh - 140px)) minmax(340px,1fr);}
+  }
+
   @media (max-height: 760px) and (orientation: landscape){
-    .game-layout{grid-template-columns:minmax(0,1fr) minmax(286px,320px);}
+    .game-layout{grid-template-columns:minmax(0,calc(100dvh - 140px)) minmax(340px,1fr);}
     header h1 .sub, footer{display:none;}
     .panel{border-radius:12px;padding:8px;}
     .dice-panel{min-height:210px;}
