@@ -141,14 +141,17 @@
 
   /* board */
   .board-shell{
+    --board-control-space:calc(clamp(34px,5.4vmin,42px) + clamp(5px,1vmin,10px));
     background:var(--panel);border-radius:16px;box-shadow:var(--shadow);
     padding:clamp(6px,1.2vmin,14px);margin:0;
     grid-area:board;
     min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    overflow:hidden;
   }
   .board-wrap{
     position:relative;width:min(100%,calc(100dvh - 96px));
     max-width:100%;
+    max-height:calc(100% - var(--board-control-space));
     flex:0 0 auto;
     aspect-ratio:1/1;
     background:var(--paper);
@@ -258,6 +261,14 @@
 
   footer{text-align:center;color:rgba(255,255,255,.5);font-size:10px;padding:0;line-height:1.2;}
 
+  @supports (width: 100cqw){
+    .board-shell{container-type:size;}
+    .board-wrap{
+      width:min(100cqw,calc(100cqh - clamp(34px,5.4vmin,42px) - clamp(5px,1vmin,10px)));
+      max-width:100%;
+    }
+  }
+
   @media (max-width: 720px) and (orientation: portrait){
     .wrap{grid-template-rows:auto minmax(0,1fr);gap:5px;}
     .game-layout{
@@ -286,7 +297,10 @@
     .wrap.game-over .special-panel{display:none;}
     .wrap.game-over .score-panel{display:block;}
     .wrap.game-over .board-wrap{width:min(100%,calc(100dvh - 390px));}
-    .board-shell{border-radius:12px;justify-content:start;}
+    .board-shell{
+      --board-control-space:calc(clamp(34px,5.4vmin,42px) + 5px);
+      border-radius:12px;justify-content:start;
+    }
     .board-wrap{width:min(100%,calc(100dvh - 365px));max-width:100%;}
     .board-controls{margin-top:5px;}
     footer{display:none;}
@@ -301,6 +315,21 @@
     .section-title{margin-bottom:5px;}
     .hint{height:32px;}
     .board-wrap{width:min(100%,calc(100dvh - 160px));max-width:100%;}
+  }
+
+  @supports (width: 100cqw){
+    @media (max-width: 720px) and (orientation: portrait){
+      .wrap.game-over .board-wrap,
+      .board-wrap{
+        width:min(100cqw,calc(100cqh - clamp(34px,5.4vmin,42px) - 5px));
+      }
+    }
+
+    @media (max-height: 760px) and (orientation: landscape){
+      .board-wrap{
+        width:min(100cqw,calc(100cqh - clamp(34px,5.4vmin,42px) - clamp(5px,1vmin,10px)));
+      }
+    }
   }
 
   @media (max-height: 670px) and (orientation: landscape){
