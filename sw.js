@@ -1,4 +1,4 @@
-const CACHE_NAME = 'railroad-ink-v1';
+const CACHE_NAME = 'railroad-ink-v2';
 const APP_SHELL = [
   './',
   './index.html',
