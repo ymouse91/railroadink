@@ -91,11 +91,12 @@
   /* dice row */
   .dice-row{
     display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(5px,1vmin,8px);
-    align-items:stretch;min-height:clamp(74px,11vmin,92px);
+    align-items:start;justify-items:center;min-height:clamp(74px,11vmin,92px);
   }
   .die{
-    height:clamp(74px,11vmin,92px);
-    min-width:0;
+    width:min(100%,clamp(74px,11vmin,92px));
+    aspect-ratio:1/1;
+    min-width:0;min-height:0;overflow:hidden;
     background:var(--paper);border:1.5px solid var(--paper-line);
     border-radius:12px;padding:clamp(5px,1vmin,8px) 3px clamp(4px,.8vmin,6px);
     display:flex;flex-direction:column;align-items:center;gap:4px;
@@ -197,11 +198,13 @@
   /* special routes strip */
   .special-strip{
     display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(4px,.8vmin,8px);
+    align-items:start;justify-items:center;
     overflow:visible;padding-bottom:0;min-height:clamp(62px,9vmin,76px);
   }
   .special-tile{
-    height:clamp(62px,9vmin,76px);
-    min-width:0;
+    width:min(100%,clamp(62px,9vmin,76px));
+    aspect-ratio:1/1;
+    min-width:0;min-height:0;overflow:hidden;
     border:1.5px solid var(--paper-line);border-radius:10px;
     background:var(--paper);padding:clamp(4px,.8vmin,6px) 3px;
     display:flex;flex-direction:column;align-items:center;gap:3px;
@@ -287,11 +290,11 @@
     .dice-panel{min-height:155px;}
     .special-panel{min-height:91px;}
     .dice-row{min-height:65px;}
-    .die{height:65px;}
+    .die{width:min(100%,65px);}
     .die .label,.special-tile .label{font-size:8px;}
     .dice-placeholder{height:65px;}
     .special-strip{min-height:55px;}
-    .special-tile{height:55px;}
+    .special-tile{width:min(100%,55px);}
     .round-badge{padding:5px 10px;font-size:12px;}
     .toolbar{flex-wrap:nowrap;min-height:35px;}
     .btn{min-width:0;white-space:nowrap;}
