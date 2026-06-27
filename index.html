@@ -65,10 +65,15 @@
     display:flex;align-items:baseline;gap:8px;
   }
   header h1 .sub{font-size:11px;font-weight:500;opacity:.75;letter-spacing:.5px;text-transform:uppercase;}
+  .header-actions{display:flex;align-items:center;gap:clamp(6px,1vmin,10px);}
   .round-badge{
     background:var(--coral);color:#fff;border-radius:999px;
     padding:6px 14px;font-weight:800;font-size:13px;
     box-shadow:var(--shadow);white-space:nowrap;
+  }
+  header .btn.ghost{
+    color:#fff;border-color:rgba(255,255,255,.36);
+    background:rgba(255,255,255,.08);
   }
 
   .game-layout{
@@ -202,7 +207,7 @@
     overflow:visible;padding-bottom:0;min-height:clamp(176px,25vmin,216px);
   }
   .special-tile{
-    width:min(100%,clamp(82px,13vmin,104px));
+    width:min(100%,clamp(74px,11vmin,92px));
     aspect-ratio:1/1;
     min-width:0;overflow:hidden;
     border:1.5px solid var(--paper-line);border-radius:10px;
@@ -213,7 +218,7 @@
   .special-tile.used{opacity:.3;}
   .special-tile.selectable{cursor:pointer;}
   .special-tile.selected{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold) inset;}
-  .special-tile svg{width:clamp(34px,5.2vmin,46px);height:clamp(34px,5.2vmin,46px);flex:0 0 auto;}
+  .special-tile svg{width:clamp(28px,4.6vmin,38px);height:clamp(28px,4.6vmin,38px);flex:0 0 auto;}
   .special-tile .label{
     font-size:9px;color:var(--ink-soft);text-align:center;font-weight:600;line-height:1.12;
     display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
@@ -238,6 +243,10 @@
     transition:opacity .16s ease;
   }
   .score-panel.is-hidden{visibility:hidden;opacity:0;pointer-events:none;}
+  .wrap.game-over .side-stack{grid-template-rows:auto;align-content:start;}
+  .wrap.game-over .dice-panel,
+  .wrap.game-over .special-panel{display:none;}
+  .wrap.game-over .score-panel{display:block;}
 
   /* modal */
   .modal-bg{
@@ -362,7 +371,10 @@
 
   <header>
     <h1>Railroad Ink<span class="sub">Yksinpeli</span></h1>
-    <div class="round-badge" id="roundBadge">Kierros 1 / 7</div>
+    <div class="header-actions">
+      <button class="btn ghost" id="rulesBtn">Säännöt</button>
+      <div class="round-badge" id="roundBadge">Kierros 1 / 7</div>
+    </div>
   </header>
 
   <main class="game-layout">
@@ -371,10 +383,9 @@
         <div class="section-title">Tämän kierroksen nopat</div>
         <div class="dice-row" id="diceRow"></div>
         <div class="toolbar">
-          <button class="btn primary" id="rollBtn"><span class="btn-icon">⚀</span>Heitä nopat</button>
           <button class="btn ghost" id="endRoundBtn" disabled>Lopeta kierros →</button>
           <div class="spacer"></div>
-          <button class="btn ghost" id="rulesBtn">Säännöt</button>
+          <button class="btn primary" id="rollBtn"><span class="btn-icon">⚀</span>Heitä nopat</button>
         </div>
         <div class="hint" id="hintText">Heitä nopat aloittaaksesi kierroksen 1.</div>
       </div>
