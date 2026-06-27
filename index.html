@@ -288,13 +288,15 @@
     .side-stack{display:grid;grid-template-columns:1fr;grid-template-rows:auto auto;gap:6px;overflow:hidden;}
     .panel{border-radius:12px;padding:7px;}
     .dice-panel{min-height:155px;}
-    .special-panel{min-height:190px;}
+    .special-panel{min-height:112px;}
     .dice-row{min-height:65px;}
     .die{width:min(100%,65px);}
-    .die .label,.special-tile .label{font-size:8px;}
+    .die .label{font-size:8px;}
     .dice-placeholder{height:65px;}
-    .special-strip{grid-template-columns:repeat(3,minmax(0,1fr));min-height:160px;}
-    .special-tile{width:min(100%,78px);aspect-ratio:1/1;}
+    .special-strip{grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;min-height:70px;}
+    .special-tile{width:min(100%,58px);aspect-ratio:1/1;padding:4px 2px;gap:2px;}
+    .special-tile svg{width:28px;height:28px;}
+    .special-tile .label{font-size:7px;line-height:1.05;-webkit-line-clamp:2;}
     .round-badge{padding:5px 10px;font-size:12px;}
     .toolbar{flex-wrap:nowrap;min-height:35px;}
     .btn{min-width:0;white-space:nowrap;}
