@@ -72,7 +72,7 @@
   }
 
   .game-layout{
-    min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,340px);
+    min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(390px,460px);
     grid-template-areas:"board controls";
     gap:clamp(6px,1.2vmin,12px);align-items:stretch;
   }
@@ -86,7 +86,7 @@
     padding:clamp(8px,1.5vmin,14px);margin:0;
   }
   .dice-panel{min-height:clamp(205px,31vmin,248px);}
-  .special-panel{min-height:clamp(100px,15vmin,120px);}
+  .special-panel{min-height:clamp(210px,30vmin,250px);}
 
   /* dice row */
   .dice-row{
@@ -197,26 +197,26 @@
 
   /* special routes strip */
   .special-strip{
-    display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(4px,.8vmin,8px);
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(6px,1vmin,10px);
     align-items:start;justify-items:center;
-    overflow:visible;padding-bottom:0;min-height:clamp(62px,9vmin,76px);
+    overflow:visible;padding-bottom:0;min-height:clamp(176px,25vmin,216px);
   }
   .special-tile{
-    width:min(100%,clamp(62px,9vmin,76px));
+    width:min(100%,clamp(82px,13vmin,104px));
     aspect-ratio:1/1;
-    min-width:0;min-height:0;overflow:hidden;
+    min-width:0;overflow:hidden;
     border:1.5px solid var(--paper-line);border-radius:10px;
-    background:var(--paper);padding:clamp(4px,.8vmin,6px) 3px;
+    background:var(--paper);padding:clamp(5px,.9vmin,7px) 4px;
     display:flex;flex-direction:column;align-items:center;gap:3px;
     position:relative;
   }
   .special-tile.used{opacity:.3;}
   .special-tile.selectable{cursor:pointer;}
   .special-tile.selected{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold) inset;}
-  .special-tile svg{width:clamp(24px,4vmin,32px);height:clamp(24px,4vmin,32px);}
+  .special-tile svg{width:clamp(34px,5.2vmin,46px);height:clamp(34px,5.2vmin,46px);flex:0 0 auto;}
   .special-tile .label{
-    font-size:8px;color:var(--ink-soft);text-align:center;font-weight:600;line-height:1.15;
-    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    font-size:9px;color:var(--ink-soft);text-align:center;font-weight:600;line-height:1.12;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
   }
   .label br{display:block;}
 
@@ -273,7 +273,7 @@
   @supports (width: 100cqw){
     .board-shell{container-type:size;}
     .board-wrap{
-      width:min(100cqw,calc(100cqh - clamp(34px,5.4vmin,42px) - clamp(5px,1vmin,10px)));
+      width:min(100cqw,calc(100cqh - clamp(34px,5.4vmin,42px) - clamp(5px,1vmin,10px) - 40px));
       max-width:100%;
     }
   }
@@ -288,13 +288,13 @@
     .side-stack{display:grid;grid-template-columns:1fr;grid-template-rows:auto auto;gap:6px;overflow:hidden;}
     .panel{border-radius:12px;padding:7px;}
     .dice-panel{min-height:155px;}
-    .special-panel{min-height:91px;}
+    .special-panel{min-height:190px;}
     .dice-row{min-height:65px;}
     .die{width:min(100%,65px);}
     .die .label,.special-tile .label{font-size:8px;}
     .dice-placeholder{height:65px;}
-    .special-strip{min-height:55px;}
-    .special-tile{width:min(100%,55px);}
+    .special-strip{grid-template-columns:repeat(3,minmax(0,1fr));min-height:160px;}
+    .special-tile{width:min(100%,78px);aspect-ratio:1/1;}
     .round-badge{padding:5px 10px;font-size:12px;}
     .toolbar{flex-wrap:nowrap;min-height:35px;}
     .btn{min-width:0;white-space:nowrap;}
@@ -316,18 +316,18 @@
   }
 
   @media (max-width: 1280px) and (orientation: landscape){
-    .game-layout{grid-template-columns:minmax(0,calc(100dvh - 140px)) minmax(340px,1fr);}
+    .game-layout{grid-template-columns:minmax(0,calc(100dvh - 180px)) minmax(390px,1fr);}
   }
 
   @media (max-height: 760px) and (orientation: landscape){
-    .game-layout{grid-template-columns:minmax(0,calc(100dvh - 140px)) minmax(340px,1fr);}
+    .game-layout{grid-template-columns:minmax(0,calc(100dvh - 180px)) minmax(390px,1fr);}
     header h1 .sub, footer{display:none;}
     .panel{border-radius:12px;padding:8px;}
     .dice-panel{min-height:210px;}
-    .special-panel{min-height:100px;}
+    .special-panel{min-height:218px;}
     .section-title{margin-bottom:5px;}
     .hint{height:32px;}
-    .board-wrap{width:min(100%,calc(100dvh - 160px));max-width:100%;}
+    .board-wrap{width:min(100%,calc(100dvh - 200px));max-width:100%;}
   }
 
   @supports (width: 100cqw){
@@ -340,7 +340,7 @@
 
     @media (max-height: 760px) and (orientation: landscape){
       .board-wrap{
-        width:min(100cqw,calc(100cqh - clamp(34px,5.4vmin,42px) - clamp(5px,1vmin,10px)));
+        width:min(100cqw,calc(100cqh - clamp(34px,5.4vmin,42px) - clamp(5px,1vmin,10px) - 40px));
       }
     }
   }
@@ -625,7 +625,7 @@ function evaluatePlacement(r,c,key,rot,flip){
    ============================================================ */
 const svg = document.getElementById('board');
 const SVG_SIZE = 700;
-const BOARD_MARGIN = 34; // space around the grid reserved for exit markers
+const BOARD_MARGIN = 48; // space around the grid reserved for exit markers
 const GRID_SIZE = SVG_SIZE - BOARD_MARGIN*2;
 const CELL = GRID_SIZE / GRID;
 function gx(c){ return BOARD_MARGIN + c*CELL; }
@@ -691,7 +691,7 @@ function drawExitArrow(ex){
   const cx = gx(ex.col) + CELL/2;
   const cy = gy(ex.row) + CELL/2;
   let x,y,rotate;
-  const len = BOARD_MARGIN - 1, half=10;
+  const len = BOARD_MARGIN - 4, half=16;
   // anchor point sits on the grid edge; the triangle points outward into the margin
   if(ex.side===N){ x=cx; y=BOARD_MARGIN; rotate=0; }
   if(ex.side===S){ x=cx; y=SVG_SIZE-BOARD_MARGIN; rotate=180; }
@@ -705,20 +705,27 @@ function drawExitArrow(ex){
   });
   g.appendChild(tri);
   if(ex.type==='h'){
-    // dashed line through the arrow marks this exit requires a highway
-    g.appendChild(svgEl('line',{
-      x1:0,y1:-len+5, x2:0,y2:-3,
-      stroke:'#ffffff','stroke-width':2.2,'stroke-dasharray':'3 2.5','stroke-linecap':'round'
-    }));
+    // three road segments mark this exit requires a highway
+    const segments = [
+      [-len+7, -len+17],
+      [-len+23, -len+31],
+      [-len+36, -5],
+    ];
+    segments.forEach(([y1,y2])=>{
+      g.appendChild(svgEl('line',{
+        x1:0,y1, x2:0,y2,
+        stroke:'#ffffff','stroke-width':3.2,'stroke-linecap':'round'
+      }));
+    });
   } else if(ex.type==='r'){
     // tie marks through the arrow mark this exit requires a railway
-    const steps=7;
+    const steps=4;
     for(let i=0;i<steps;i++){
-      const ty = -len+6 + i*((len-12)/(steps-1));
-      const tw = 2.6 + (i/(steps-1))*4.2;
-      g.appendChild(svgEl('line',{x1:-tw,y1:ty,x2:tw,y2:ty,stroke:'#ffffff','stroke-width':1.4}));
+      const ty = -len+9 + i*((len-18)/(steps-1));
+      const tw = 3.8 + (i/(steps-1))*6.2;
+      g.appendChild(svgEl('line',{x1:-tw,y1:ty,x2:tw,y2:ty,stroke:'#ffffff','stroke-width':2}));
     }
-    g.appendChild(svgEl('line',{x1:0,y1:-len+5,x2:0,y2:-2,stroke:'#ffffff','stroke-width':1.8}));
+    g.appendChild(svgEl('line',{x1:0,y1:-len+5,x2:0,y2:-3,stroke:'#ffffff','stroke-width':2.6}));
   }
   svg.appendChild(g);
 }
@@ -750,7 +757,7 @@ function drawPieceInCell(r,c,edges,kind,isGhost,isInvalid){
   const armLen = half*0.92;
 
   // helper to draw an arm from center toward a side
-  function arm(side, type, offsetPerp){
+  function arm(side, type, offsetPerp, drawTies=true){
     let dx=DX[side]*armLen, dy=DY[side]*armLen;
     let ox=0, oy=0;
     if(offsetPerp){
@@ -762,14 +769,28 @@ function drawPieceInCell(r,c,edges,kind,isGhost,isInvalid){
     } else if(type==='r'){
       g.appendChild(svgEl('line',{x1,y1,x2,y2,class:'route-line','stroke-width':3}));
       // ties
-      const steps=4;
-      for(let i=1;i<=steps;i++){
-        const t=i/(steps+1);
-        const px=x1+(x2-x1)*t, py=y1+(y2-y1)*t;
-        const perpX = (side===N||side===S)?6:0;
-        const perpY = (side===E||side===W)?6:0;
-        g.appendChild(svgEl('line',{x1:px-perpX,y1:py-perpY,x2:px+perpX,y2:py+perpY,class:'route-railway-tie','stroke-width':1.6}));
+      if(drawTies){
+        const steps=4;
+        for(let i=1;i<=steps;i++){
+          const t=i/(steps+1);
+          const px=x1+(x2-x1)*t, py=y1+(y2-y1)*t;
+          const perpX = (side===N||side===S)?6:0;
+          const perpY = (side===E||side===W)?6:0;
+          g.appendChild(svgEl('line',{x1:px-perpX,y1:py-perpY,x2:px+perpX,y2:py+perpY,class:'route-railway-tie','stroke-width':1.6}));
+        }
       }
+    }
+  }
+
+  function straightRailTies(vertical){
+    const steps=5;
+    for(let i=1;i<=steps;i++){
+      const t=i/(steps+1);
+      const px = vertical ? cx : cx-armLen+(armLen*2*t);
+      const py = vertical ? cy-armLen+(armLen*2*t) : cy;
+      const perpX = vertical ? 6 : 0;
+      const perpY = vertical ? 0 : 6;
+      g.appendChild(svgEl('line',{x1:px-perpX,y1:py-perpY,x2:px+perpX,y2:py+perpY,class:'route-railway-tie','stroke-width':1.6}));
     }
   }
 
@@ -790,14 +811,24 @@ function drawPieceInCell(r,c,edges,kind,isGhost,isInvalid){
       g.appendChild(svgEl('line',{x1:cx-9,y1:cy,x2:cx+9,y2:cy,stroke:'var(--rail)','stroke-width':3,'stroke-linecap':'round',class:'route-highway'}));
     }
   } else if(kind==='station' || kind==='station3' || kind==='station4'){
+    const straightRailNS = edges[N]==='r' && edges[S]==='r';
+    const straightRailEW = edges[E]==='r' && edges[W]==='r';
     for(let s=0;s<4;s++){
-      if(edges[s]) arm(s, edges[s]);
+      const isStraightRailArm = edges[s]==='r' && ((straightRailNS && (s===N||s===S)) || (straightRailEW && (s===E||s===W)));
+      if(edges[s]) arm(s, edges[s], undefined, !isStraightRailArm);
     }
+    if(straightRailNS) straightRailTies(true);
+    if(straightRailEW) straightRailTies(false);
     g.appendChild(svgEl('circle',{cx,cy,r:7,class:'station-dot'}));
   } else {
+    const straightRailNS = edges[N]==='r' && edges[S]==='r';
+    const straightRailEW = edges[E]==='r' && edges[W]==='r';
     for(let s=0;s<4;s++){
-      if(edges[s]) arm(s, edges[s]);
+      const isStraightRailArm = edges[s]==='r' && ((straightRailNS && (s===N||s===S)) || (straightRailEW && (s===E||s===W)));
+      if(edges[s]) arm(s, edges[s], undefined, !isStraightRailArm);
     }
+    if(straightRailNS) straightRailTies(true);
+    if(straightRailEW) straightRailTies(false);
   }
 
   svg.appendChild(g);
@@ -940,11 +971,32 @@ function tileMiniSvg(key, size, rot, flip){
     }
     return '';
   }
+  function straightRailFor(vertical){
+    let l = vertical
+      ? `<line x1="${c}" y1="${c-arm}" x2="${c}" y2="${c+arm}" stroke="#13314f" stroke-width="2.6" stroke-linecap="round"/>`
+      : `<line x1="${c-arm}" y1="${c}" x2="${c+arm}" y2="${c}" stroke="#13314f" stroke-width="2.6" stroke-linecap="round"/>`;
+    const steps=5;
+    for(let i=1;i<=steps;i++){
+      const t=i/(steps+1);
+      const px = vertical ? c : c-arm+(arm*2*t);
+      const py = vertical ? c-arm+(arm*2*t) : c;
+      const perpX=vertical?4:0, perpY=vertical?0:4;
+      l += `<line x1="${px-perpX}" y1="${py-perpY}" x2="${px+perpX}" y2="${py+perpY}" stroke="#13314f" stroke-width="1.3"/>`;
+    }
+    return l;
+  }
   if(kind==='overpass'){
     inner += lineFor(N,'h')+lineFor(S,'h')+lineFor(E,'r')+lineFor(W,'r');
     inner += `<rect x="${c-7}" y="${c-2.5}" width="14" height="5" fill="#eef5fb"/><line x1="${c-7}" y1="${c}" x2="${c+7}" y2="${c}" stroke="#13314f" stroke-width="2.6" stroke-dasharray="4 3"/>`;
   } else {
-    for(let s2=0;s2<4;s2++){ if(edges[s2]) inner+=lineFor(s2,edges[s2]); }
+    const straightRailNS = edges[N]==='r' && edges[S]==='r';
+    const straightRailEW = edges[E]==='r' && edges[W]==='r';
+    for(let s2=0;s2<4;s2++){
+      const isStraightRailArm = edges[s2]==='r' && ((straightRailNS && (s2===N||s2===S)) || (straightRailEW && (s2===E||s2===W)));
+      if(edges[s2] && !isStraightRailArm) inner+=lineFor(s2,edges[s2]);
+    }
+    if(straightRailNS) inner += straightRailFor(true);
+    if(straightRailEW) inner += straightRailFor(false);
     if(kind!=='route') inner += `<circle cx="${c}" cy="${c}" r="4.5" fill="#13314f"/>`;
   }
   const angle = ((rot||0)%4)*90;
