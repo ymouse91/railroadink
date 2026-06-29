@@ -1,8 +1,7 @@
-const CACHE_NAME = 'railroad-ink-v11';
+const CACHE_NAME = 'railroad-ink-v12';
 const APP_SHELL = [
   './',
   './index.html',
-  './index_multipl.html',
   './manifest.webmanifest',
   './assets/icon.svg',
   './assets/icon-192.png',
